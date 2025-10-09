@@ -12,13 +12,14 @@ export function initToolbar() {
     const drawBtn = document.getElementById('draw-btn');
     const selectBtn = document.getElementById('select-btn');
     const fillBtn = document.getElementById('fill-btn');
+    const deleteBtn = document.getElementById('delete-btn');
     const inferenceBtn = document.getElementById('inference-btn');
     const clearBtn = document.getElementById('clear-btn');
     const importBtn = document.getElementById('import-btn');
     const exportBtn = document.getElementById('export-btn');
     
     // Add active class to track current tool
-    const toolButtons = [drawBtn, selectBtn, fillBtn, inferenceBtn];
+    const toolButtons = [drawBtn, selectBtn, fillBtn, deleteBtn, inferenceBtn];
     
     // Store reference to canvas for external access
     window.appCanvas = canvas;
@@ -33,20 +34,45 @@ export function initToolbar() {
         }
     }
     
-    // Function to enable/disable drawing tools
-    function setDrawingToolsEnabled(enabled) {
+    // Function to enable/disable drawing tools with optional color
+    function setDrawingToolsEnabled(enabled, color = null) {
         [drawBtn, selectBtn, fillBtn, inferenceBtn, clearBtn, exportBtn].forEach(btn => {
             if (btn) {
                 btn.disabled = !enabled;
                 if (enabled) {
                     btn.style.opacity = '1';
                     btn.style.cursor = 'pointer';
+                    
+                    // Apply extracted color if provided
+                    if (color) {
+                        btn.style.backgroundColor = color;
+                        btn.style.borderColor = color;
+                        btn.style.color = getContrastColor(color); // Ensure text is readable
+                    }
                 } else {
                     btn.style.opacity = '0.5';
                     btn.style.cursor = 'not-allowed';
+                    // Reset to default styles when disabled
+                    btn.style.backgroundColor = '';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
                 }
             }
         });
+    }
+    
+    // Helper function to get contrasting text color
+    function getContrastColor(hexColor) {
+        // Convert hex to RGB
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+        
+        // Calculate luminance
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        // Return white or black based on luminance
+        return luminance > 0.5 ? '#000000' : '#ffffff';
     }
     
     // Initially disable drawing tools (waiting for image import)
@@ -84,19 +110,16 @@ export function initToolbar() {
         clearBtn.addEventListener('click', () => {
             if (!clearBtn.disabled && confirm('确定要清空画布吗？')) {
                 clearCanvas();
-                // After clearing, we might want to keep tools enabled if there's still an image
-                // or disable them if the image was also cleared
-                if (!canvas.drawingState || !canvas.drawingState.hasImage()) {
-                    setDrawingToolsEnabled(false);
-                }
+                // After clearing, reset button colors to default
+                setDrawingToolsEnabled(false);
             }
         });
     }
     
     // Setup import/export with callback for enabling tools
-    setupImportButton(canvas, () => {
+    setupImportButton(canvas, (extractedColor) => {
         // This callback is called when image is successfully imported
-        setDrawingToolsEnabled(true);
+        setDrawingToolsEnabled(true, extractedColor);
         
         // Set draw as default active tool after import
         if (drawBtn && !drawBtn.disabled) {

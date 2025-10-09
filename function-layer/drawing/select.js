@@ -11,21 +11,13 @@ import { redrawCanvas } from './polygon.js';
 export function enableSelection(drawingState, canvas, ctx) {
     // 设置模式为选择
     drawingState.mode = 'select';
+    drawingState.hoveredVertexIndex = -1; // 初始化悬停顶点索引
     canvas.style.cursor = 'default';
     
-    // 更新状态栏
-    const toolStatusElement = document.getElementById('tool-status');
-    const helpTextElement = document.getElementById('help-text');
+    // 更新UI
+    updateSelectionUI(drawingState);
     
-    if (toolStatusElement) {
-        toolStatusElement.textContent = '当前工具: 选择';
-    }
-    
-    if (helpTextElement) {
-        helpTextElement.textContent = '点击选择多边形，拖动顶点编辑形状，拖动多边形移动位置';
-    }
-    
-    // 移除现有事件监听器
+    // 移除现有事件监听器以避免重复
     canvas.removeEventListener('mousedown', handleSelectionMouseDown);
     canvas.removeEventListener('mousemove', handleSelectionMouseMove);
     canvas.removeEventListener('mouseup', handleSelectionMouseUp);
@@ -43,6 +35,28 @@ export function enableSelection(drawingState, canvas, ctx) {
 }
 
 /**
+ * 更新选择模式的UI文本
+ * @param {Object} drawingState - 绘图状态对象
+ * @description 统一更新状态栏和帮助文本
+ */
+function updateSelectionUI(drawingState) {
+    const toolStatusElement = document.getElementById('tool-status');
+    const helpTextElement = document.getElementById('help-text');
+    
+    if (toolStatusElement) {
+        toolStatusElement.textContent = '当前工具: 选择';
+    }
+    
+    if (helpTextElement) {
+        if (drawingState.selectedPolygons.length > 0) {
+            helpTextElement.textContent = `已选择 ${drawingState.selectedPolygons.length} 个多边形 - 拖动顶点编辑或移动多边形`;
+        } else {
+            helpTextElement.textContent = '点击选择多边形，拖动顶点编辑形状，拖动多边形移动位置';
+        }
+    }
+}
+
+/**
  * 处理选择模式下的鼠标按下事件
  * @param {MouseEvent} e - 鼠标事件对象
  * @description 处理多边形选择、顶点移动和选择框创建
@@ -56,8 +70,13 @@ function handleSelectionMouseDown(e) {
     const drawingState = e.target.drawingState;
     
     // 检查是否点击了多边形顶点
-    if (drawingState.selectedPolygons.length === 1 && hoveredVertexIndex >= 0) {
-        drawingState.startMovingVertex(drawingState.selectedPolygons[0], hoveredVertexIndex, x, y);
+    if (drawingState.selectedPolygons.length === 1 && drawingState.hoveredVertexIndex >= 0) {
+        drawingState.startMovingVertex(drawingState.selectedPolygons[0], drawingState.hoveredVertexIndex, x, y);
+        // 更新UI
+        const helpTextElement = document.getElementById('help-text');
+        if (helpTextElement) {
+            helpTextElement.textContent = '移动顶点中...';
+        }
         return;
     }
     
@@ -66,6 +85,11 @@ function handleSelectionMouseDown(e) {
         const polygon = drawingState.selectedPolygons[0];
         if (polygon.containsPoint(x, y)) {
             drawingState.startDraggingPolygon(x, y);
+            // 更新UI
+            const helpTextElement = document.getElementById('help-text');
+            if (helpTextElement) {
+                helpTextElement.textContent = '拖动多边形中...';
+            }
             return;
         }
     }
@@ -100,11 +124,8 @@ function handleSelectionMouseDown(e) {
             drawingState.selectedPolygons.push(clickedPolygon);
         }
         
-        // 更新帮助文本
-        const helpTextElement = document.getElementById('help-text');
-        if (helpTextElement) {
-            helpTextElement.textContent = `已选择 ${drawingState.selectedPolygons.length} 个多边形`;
-        }
+        // 更新UI
+        updateSelectionUI(drawingState);
         
         // 重绘画布
         redrawCanvas(e.target.getContext('2d'), e.target);
@@ -112,11 +133,8 @@ function handleSelectionMouseDown(e) {
         // 如果没有按住Shift键且点击了空白区域，则清除选择
         drawingState.clearSelection();
         
-        // 更新帮助文本
-        const helpTextElement = document.getElementById('help-text');
-        if (helpTextElement) {
-            helpTextElement.textContent = '点击选择多边形，拖动顶点编辑形状，拖动多边形移动位置';
-        }
+        // 更新UI
+        updateSelectionUI(drawingState);
         
         redrawCanvas(e.target.getContext('2d'), e.target);
     }
@@ -125,40 +143,56 @@ function handleSelectionMouseDown(e) {
 /**
  * 处理选择模式下的鼠标移动事件
  * @param {MouseEvent} e - 鼠标事件对象
- * @description 处理顶点移动、多边形拖动和选择框更新
+ * @description 处理顶点移动、多边形拖动、选择框更新和顶点悬停检测
  */
 function handleSelectionMouseMove(e) {
     const drawingState = e.target.drawingState;
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
     // 处理顶点移动
     if (drawingState.mode === 'move-vertex' && drawingState.dragStartPos) {
-        drawingState.updateVertexPosition(e.clientX - e.target.getBoundingClientRect().left, 
-                                         e.clientY - e.target.getBoundingClientRect().top);
+        drawingState.updateVertexPosition(x, y);
         redrawCanvas(e.target.getContext('2d'), e.target);
         return;
     }
     
     // 处理多边形拖动
     if (drawingState.mode === 'drag-polygon' && drawingState.dragStartPos) {
-        drawingState.updateDraggedPolygon(e.clientX - e.target.getBoundingClientRect().left, 
-                                         e.clientY - e.target.getBoundingClientRect().top);
+        drawingState.updateDraggedPolygon(x, y);
         redrawCanvas(e.target.getContext('2d'), e.target);
         return;
     }
     
     // 处理选择框
-    if (!drawingState.selectionRect || !drawingState.selectionRect.isActive) return;
+    if (drawingState.selectionRect && drawingState.selectionRect.isActive) {
+        // 更新选择框尺寸
+        drawingState.selectionRect.width = x - drawingState.selectionRect.startX;
+        drawingState.selectionRect.height = y - drawingState.selectionRect.startY;
+        redrawCanvas(e.target.getContext('2d'), e.target);
+        return;
+    }
     
-    const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // 顶点悬停检测：当不在拖动模式时，检查鼠标是否悬停在顶点上
+    drawingState.hoveredVertexIndex = -1; // 重置
+    if (drawingState.selectedPolygons.length === 1) {
+        const polygon = drawingState.selectedPolygons[0];
+        for (let i = 0; i < polygon.vertices.length; i++) {
+            const vertex = polygon.vertices[i];
+            const distance = Math.sqrt((x - vertex.x) ** 2 + (y - vertex.y) ** 2);
+            if (distance <= 10) { // 悬停半径10像素
+                drawingState.hoveredVertexIndex = i;
+                e.target.style.cursor = 'move'; // 更改光标为移动指示
+                break;
+            }
+        }
+    }
     
-    // 更新选择框尺寸
-    drawingState.selectionRect.width = x - drawingState.selectionRect.startX;
-    drawingState.selectionRect.height = y - drawingState.selectionRect.startY;
-    
-    // 重绘画布
-    redrawCanvas(e.target.getContext('2d'), e.target);
+    // 如果没有悬停在顶点上，恢复默认光标
+    if (drawingState.hoveredVertexIndex === -1) {
+        e.target.style.cursor = 'default';
+    }
 }
 
 /**
@@ -172,12 +206,16 @@ function handleSelectionMouseUp(e) {
     // 停止移动顶点
     if (drawingState.mode === 'move-vertex') {
         drawingState.stopMovingVertex();
+        // 更新UI
+        updateSelectionUI(drawingState);
         return;
     }
     
     // 停止拖动多边形
     if (drawingState.mode === 'drag-polygon') {
         drawingState.stopDraggingPolygon();
+        // 更新UI
+        updateSelectionUI(drawingState);
         return;
     }
     
@@ -188,7 +226,7 @@ function handleSelectionMouseUp(e) {
         (Math.abs(drawingState.selectionRect.width) > 5 || 
          Math.abs(drawingState.selectionRect.height) > 5)) {
         
-        // 标准化选择框坐标（确保左上角是起点）
+        // 标准化选择框坐标
         const selRect = {
             left: Math.min(drawingState.selectionRect.startX, drawingState.selectionRect.startX + drawingState.selectionRect.width),
             top: Math.min(drawingState.selectionRect.startY, drawingState.selectionRect.startY + drawingState.selectionRect.height),
@@ -203,7 +241,6 @@ function handleSelectionMouseUp(e) {
         
         // 选择所有与选择框相交的多边形
         drawingState.polygons.forEach(polygon => {
-            // 检查是否有任何顶点在选择框内
             const isInside = polygon.vertices.some(vertex => 
                 vertex.x >= selRect.left && 
                 vertex.x <= selRect.right && 
@@ -216,20 +253,13 @@ function handleSelectionMouseUp(e) {
                 drawingState.selectedPolygons.push(polygon);
             }
         });
-        
-        // 更新帮助文本
-        const helpTextElement = document.getElementById('help-text');
-        if (helpTextElement) {
-            if (drawingState.selectedPolygons.length > 0) {
-                helpTextElement.textContent = `已选择 ${drawingState.selectedPolygons.length} 个多边形`;
-            } else {
-                helpTextElement.textContent = '点击选择多边形，拖动顶点编辑形状，拖动多边形移动位置';
-            }
-        }
     }
     
     // 清除选择框
     drawingState.selectionRect = null;
+    
+    // 更新UI
+    updateSelectionUI(drawingState);
     
     // 重绘画布
     redrawCanvas(e.target.getContext('2d'), e.target);
@@ -245,11 +275,8 @@ export function clearSelection(ctx, canvas) {
     const drawingState = canvas.drawingState;
     drawingState.clearSelection();
     
-    // 更新帮助文本
-    const helpTextElement = document.getElementById('help-text');
-    if (helpTextElement) {
-        helpTextElement.textContent = '点击选择多边形，拖动顶点编辑形状，拖动多边形移动位置';
-    }
+    // 更新UI
+    updateSelectionUI(drawingState);
     
     redrawCanvas(ctx, canvas);
 }

@@ -21,6 +21,7 @@ export class DrawingState {
         this.dragStartPos = null; // 拖动起始位置
         this.draggedImageOffset = { x: 0, y: 0 }; // 图像拖动偏移量
         this.activeVertexIndex = -1; // 当前活动顶点索引
+        this.hoveredVertexIndex = -1; // 当前悬停的顶点索引，-1表示没有
     }
 
     /**
