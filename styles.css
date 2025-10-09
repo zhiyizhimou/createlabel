@@ -1,0 +1,154 @@
+/* 全局样式 */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* 顶部栏（可选，根据需要添加） */
+#top-bar {
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* 主内容区域：使用flex布局，包含侧边栏、画布和属性面板 */
+#main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 左侧侧边栏：工具按钮 */
+#sidebar {
+    width: 200px;
+    background-color: #333;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+#sidebar button {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    text-align: left;
+}
+
+#sidebar button:hover {
+    background-color: #777;
+}
+
+#sidebar button.active {
+    background-color: #4CAF50;
+    font-weight: bold;
+}
+
+/* 中间画布区域 */
+#canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    overflow: hidden;
+    position: relative;
+}
+
+#canvas {
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    cursor: crosshair; /* 默认光标，可根据工具切换 */
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 右侧属性面板 */
+#properties-panel {
+    width: 250px;
+    background-color: #444;
+    padding: 10px;
+    color: white;
+    overflow-y: auto;
+}
+
+#properties-panel .section {
+    margin-bottom: 15px;
+}
+
+#properties-panel label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+#properties-panel input[type="color"] {
+    width: 100%;
+    height: 30px;
+    border: none;
+    cursor: pointer;
+}
+
+#properties-panel input[type="range"] {
+    width: 100%;
+}
+
+#properties-panel .value-display {
+    text-align: center;
+    font-size: 12px;
+}
+
+/* 底部状态栏 */
+#status-bar {
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+#status-bar span {
+    margin-right: 20px;
+}
+
+#help-text {
+    color: #4CAF50;
+    font-style: italic;
+}
+
+/* 响应式设计：在小屏幕上调整布局 */
+@media (max-width: 768px) {
+    #main-container {
+        flex-direction: column;
+    }
+
+    #sidebar, #properties-panel {
+        width: 100%;
+        height: auto;
+        order: 1; /* 侧边栏在上 */
+    }
+
+    #canvas-container {
+        order: 2; /* 画布在中间 */
+    }
+
+    #properties-panel {
+        order: 3; /* 属性面板在下 */
+    }
+}
