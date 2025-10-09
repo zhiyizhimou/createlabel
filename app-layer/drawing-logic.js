@@ -44,6 +44,8 @@ export function initDrawingLogic() {
     // Setup keyboard shortcuts
     setupKeyboardShortcuts();
     
+    // 让删除逻辑可被外部调用（如toolbar）
+    window.deleteSelectedPolygons = deleteSelectedPolygons;
     return {
         canvas,
         ctx,

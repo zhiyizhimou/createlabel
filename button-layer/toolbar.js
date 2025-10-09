@@ -87,7 +87,7 @@ export function initToolbar() {
             }
         });
     }
-    
+
     if (selectBtn) {
         selectBtn.addEventListener('click', () => {
             if (!selectBtn.disabled) {
@@ -96,7 +96,7 @@ export function initToolbar() {
             }
         });
     }
-    
+
     if (fillBtn) {
         fillBtn.addEventListener('click', () => {
             if (!fillBtn.disabled) {
@@ -105,7 +105,19 @@ export function initToolbar() {
             }
         });
     }
-    
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            // 调用全局删除逻辑
+            if (!deleteBtn.disabled && window.appCanvas && window.appCanvas.drawingState) {
+                // 复用 app-layer/drawing-logic.js 的 deleteSelectedPolygons
+                if (window.deleteSelectedPolygons) {
+                    window.deleteSelectedPolygons();
+                }
+            }
+        });
+    }
+
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (!clearBtn.disabled && confirm('确定要清空画布吗？')) {
