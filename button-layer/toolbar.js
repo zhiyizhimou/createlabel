@@ -1,5 +1,5 @@
 // Toolbar controller for UI interactions
-import { initDrawingLogic, enableDrawing, enableSelectionMode, clearCanvas } from '../app-layer/drawing-logic.js';
+import { initDrawingLogic, enableDrawing, enableSelectionMode, clearCanvas, resizeCanvas } from '../app-layer/drawing-logic.js';
 import { redrawCanvas } from '../function-layer/drawing/polygon.js';
 import { setupImportButton } from './file-io/import.js';
 import { exportImage } from './file-io/export.js';
@@ -286,7 +286,12 @@ function initTagManagement() {
             // toggle edit panel
             editBtn.addEventListener('click', (ev) => {
                 ev.stopPropagation();
-                editPanel.style.display = editPanel.style.display === 'none' ? 'flex' : 'none';
+                const willShow = editPanel.style.display === 'none';
+                editPanel.style.display = willShow ? 'flex' : 'none';
+                // After UI layout changes, request animation frame twice to ensure layout stabilized, then resize canvas
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
+                }));
             });
 
             // live update while editing
@@ -329,6 +334,9 @@ function initTagManagement() {
             saveBtn.addEventListener('click', (ev) => {
                 ev.stopPropagation();
                 editPanel.style.display = 'none';
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
+                }));
             });
             cancelBtn.addEventListener('click', (ev) => {
                 ev.stopPropagation();
@@ -337,6 +345,9 @@ function initTagManagement() {
                 editOpacity.value = String(newTag.opacity);
                 applyLiveUpdate(newTag.color, newTag.opacity);
                 editPanel.style.display = 'none';
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
+                }));
             });
 
             // Clear input

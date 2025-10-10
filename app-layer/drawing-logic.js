@@ -138,7 +138,7 @@ function deleteSelectedPolygons() {
 }
 
 // Resize canvas to match display size
-function resizeCanvas() {
+export function resizeCanvas() {
     const displayWidth = canvas.clientWidth;
     const displayHeight = canvas.clientHeight;
     

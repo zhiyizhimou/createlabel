@@ -9,22 +9,23 @@
 <body>
     <!-- 顶部栏（用于标题或菜单） -->
     <div id="top-bar">
-        <span>自动标注系统</span>
-        <span>版本 1.0</span>
+        <div class="top-bar-inner">
+            <span>自动标注系统</span>
+            <span>版本 1.0</span>
+        </div>
     </div>
 
     <!-- 主容器：侧边栏、画布和标签面板 -->
+    <main id="main-wrapper" style="flex:1;">
     <div id="main-container">
         <!-- 左侧侧边栏：工具按钮 -->
         <div id="sidebar">
-            <button id="draw-btn" class="active" title="绘制多边形">绘制</button>
-            <button id="select-btn" title="选择多边形">选择</button>
-            <button id="inference-btn" title="AI推理">推理</button>
-            <button id="clear-btn" title="清空画布">清空</button>
-            <button id="import-btn" title="导入图像">导入图像</button>
-            <button id="export-btn" title="导出图像">导出图像</button>
-            
-            <!-- 标签管理已移动到右侧属性面板 -->
+            <button id="draw-btn" class="tool-btn active" title="绘制多边形">绘制</button>
+            <button id="select-btn" class="tool-btn" title="选择多边形">选择</button>
+            <button id="inference-btn" class="tool-btn" title="AI推理">推理</button>
+            <button id="clear-btn" class="tool-btn" title="清空画布">清空</button>
+            <button id="import-btn" class="tool-btn" title="导入图像">导入图像</button>
+            <button id="export-btn" class="tool-btn" title="导出图像">导出图像</button>
         </div>
 
         <!-- 中间画布区域 -->
@@ -50,6 +51,7 @@
             </div>
         </div>
     </div>
+    </main>
 
     <!-- 底部状态栏 -->
     <div id="status-bar">
