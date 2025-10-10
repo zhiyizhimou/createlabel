@@ -24,6 +24,16 @@ export function initDrawingLogic() {
     
     // Store drawing state on canvas for event handlers
     canvas.drawingState = drawingState;
+
+    // Expose useful functions globally for export and external modules
+    try {
+        if (window) {
+            window.resizeCanvas = resizeCanvas;
+            window.redrawCanvas = redrawCanvas;
+        }
+    } catch (e) {
+        // ignore in environments where window is not writable
+    }
     
     // Initialize color picker
     initColorPicker(drawingState, canvas, ctx);

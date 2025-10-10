@@ -7,8 +7,32 @@ export function exportImage(canvas) {
             helpTextElement.textContent = '正在导出图像...';
         }
         
+        // To ensure hidden-tag polygons are included, draw everything to an offscreen canvas
+        const off = document.createElement('canvas');
+        off.width = canvas.width;
+        off.height = canvas.height;
+        const offCtx = off.getContext('2d');
+        // Try to use redrawCanvas from polygon module if available
+        try {
+            // dynamic import-ish: redrawCanvas should be globally available via imports in app
+            if (window && typeof window.appCanvas !== 'undefined') {
+                // If redrawCanvas is exported globally, call it; otherwise fallback to drawing current visible canvas
+                if (typeof window.redrawCanvas === 'function') {
+                    window.redrawCanvas(offCtx, off, true);
+                } else {
+                    // fallback: copy current canvas pixels (includes visible ones)
+                    offCtx.drawImage(canvas, 0, 0);
+                }
+            } else {
+                offCtx.drawImage(canvas, 0, 0);
+            }
+        } catch (e) {
+            // if anything goes wrong, fallback to current canvas
+            offCtx.drawImage(canvas, 0, 0);
+        }
+
         // Create a data URL representing the image
-        const dataUrl = canvas.toDataURL('image/png');
+        const dataUrl = off.toDataURL('image/png');
         
         // Create a link element and trigger download
         const link = document.createElement('a');

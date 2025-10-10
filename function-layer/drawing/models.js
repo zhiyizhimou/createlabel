@@ -77,7 +77,14 @@ export class DrawingState {
      * @returns {Polygon|null} 包含该点的多边形，如果没有则返回null
      */
     getPolygonAt(x, y) {
-        return this.polygons.find(p => p.containsPoint(x, y));
+        return this.polygons.find(p => {
+            // if polygon's tag is hidden, ignore it for hit-testing
+            if (p.tagName && window && Array.isArray(window.tags)) {
+                const tag = window.tags.find(t => t.name === p.tagName);
+                if (tag && tag.visible === false) return false;
+            }
+            return p.containsPoint(x, y);
+        });
     }
 
     /**

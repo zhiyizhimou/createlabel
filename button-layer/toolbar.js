@@ -167,6 +167,9 @@ function initTagManagement() {
             colorSwatch.style.backgroundColor = color;
             colorSwatch.style.opacity = String(opacity);
 
+            // visible flag default true
+            newTag.visible = true;
+
             metaDiv.appendChild(opacityLabel);
             metaDiv.appendChild(colorSwatch);
 
@@ -219,6 +222,23 @@ function initTagManagement() {
                 }
             });
             tagElement.appendChild(deleteBtn);
+
+            // add visibility toggle (eye icon style)
+            const visBtn = document.createElement('button');
+            visBtn.className = 'btn-ghost';
+            visBtn.title = '显示/隐藏 标签绘制';
+            visBtn.innerHTML = '👁';
+            visBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                newTag.visible = !newTag.visible;
+                visBtn.style.opacity = newTag.visible ? '1' : '0.35';
+                // redraw canvas (exclude hidden if any)
+                if (window.appCanvas) {
+                    const ctx = window.appCanvas.getContext('2d');
+                    redrawCanvas(ctx, window.appCanvas);
+                }
+            });
+            tagElement.appendChild(visBtn);
 
             // add edit button for the tag
             const editBtn = document.createElement('button');

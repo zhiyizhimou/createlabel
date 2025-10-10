@@ -310,7 +310,7 @@ export function drawPolygon(ctx, startPos) {
  * @param {HTMLCanvasElement} canvas - 画布元素
  * @description 清空画布并重新绘制所有元素（图像、多边形、选择框等）
  */
-export function redrawCanvas(ctx, canvas) {
+export function redrawCanvas(ctx, canvas, includeHidden = false) {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -346,6 +346,11 @@ export function redrawCanvas(ctx, canvas) {
     
     // 绘制所有已完成的多边形
     drawingState.polygons.forEach(polygon => {
+        // 如果不包含隐藏项且该多边形属于一个被隐藏的标签，则跳过绘制
+        if (!includeHidden && polygon.tagName && window && Array.isArray(window.tags)) {
+            const tag = window.tags.find(t => t.name === polygon.tagName);
+            if (tag && tag.visible === false) return; // skip drawing hidden tag polygons
+        }
         polygon.draw(ctx);
     });
     
