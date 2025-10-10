@@ -28,15 +28,31 @@ export function initDrawingLogic() {
     // Initialize color picker
     initColorPicker(drawingState, canvas, ctx);
     
-    // Setup import/export buttons
+    // Setup import/export buttons (guard element existence)
     setupImportButton(canvas);
-    document.getElementById('export-btn').addEventListener('click', () => exportImage(canvas));
-    
-    // Setup toolbar buttons
-    document.getElementById('draw-btn').addEventListener('click', () => enableDrawing());
-    document.getElementById('select-btn').addEventListener('click', () => enableSelectionMode());
-    document.getElementById('fill-btn').addEventListener('click', () => enableFillMode());
-    document.getElementById('clear-btn').addEventListener('click', () => clearCanvas());
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => exportImage(canvas));
+    }
+
+    // Setup toolbar buttons (guard element existence to avoid runtime errors when HTML omits some controls)
+    const drawBtn = document.getElementById('draw-btn');
+    const selectBtn = document.getElementById('select-btn');
+    const fillBtn = document.getElementById('fill-btn');
+    const clearBtn = document.getElementById('clear-btn');
+
+    if (drawBtn) {
+        drawBtn.addEventListener('click', () => enableDrawing());
+    }
+    if (selectBtn) {
+        selectBtn.addEventListener('click', () => enableSelectionMode());
+    }
+    if (fillBtn) {
+        fillBtn.addEventListener('click', () => enableFillMode());
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => clearCanvas());
+    }
     
     // Disable canvas initially
     canvas.style.cursor = 'not-allowed';
@@ -140,6 +156,20 @@ function resizeCanvas() {
 
 // Enable drawing mode
 export function enableDrawing() {
+    // Require a selected tag before drawing
+    if (!window.currentTag) {
+        alert('请先选择一个标签再进行绘制');
+        return;
+    }
+
+    // Ensure drawingState uses current tag color and opacity
+    if (window.currentTag) {
+        drawingState.currentColor = window.currentTag.color || drawingState.currentColor;
+        if (typeof window.currentTag.opacity === 'number') {
+            drawingState.currentOpacity = window.currentTag.opacity;
+        }
+    }
+
     enablePolygonDrawing(canvas, ctx);
 }
 

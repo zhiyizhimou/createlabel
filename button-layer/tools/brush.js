@@ -7,6 +7,12 @@ export function activateBrush() {
     const ctx = canvas.getContext('2d');
 
     canvas.addEventListener('mousedown', (e) => {
+        // Check if a tag is selected
+        if (!window.currentTag) {
+            alert('请先选择一个标签');
+            return;
+        }
+        
         const pos = { x: e.clientX, y: e.clientY };
         drawPolygon(ctx, pos);
     });

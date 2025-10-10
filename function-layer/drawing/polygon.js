@@ -249,15 +249,39 @@ function handleDrawingMouseDown(e) {
  */
 function handleDrawingRightClick(e) {
     e.preventDefault(); // 阻止默认右键菜单
-    
-    // 如果当前多边形有至少3个顶点，则完成绘制
-    if (drawingState.currentPolygon && drawingState.currentPolygon.vertices.length >= 3) {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // 如果当前处于绘制模式且当前多边形有至少3个顶点，右键仍用于完成当前绘制
+    if (drawingState.mode === 'draw' && drawingState.currentPolygon && drawingState.currentPolygon.vertices.length >= 3) {
         drawingState.finishCurrentPolygon();
         drawingState.startNewPolygon();
-        
+
         // 更新帮助文本
-        helpTextElement.textContent = '左键点击添加顶点，右键或闭合多边形完成绘制';
-        
+        if (helpTextElement) helpTextElement.textContent = '左键点击添加顶点，右键或闭合多边形完成绘制';
+
+        // 重绘画布
+        redrawCanvas(e.target.getContext('2d'), e.target);
+        return;
+    }
+
+    // 非绘制模式或未在绘制中时，尝试对右键点击的多边形进行填充
+    const clickedPolygon = drawingState.getPolygonAt(x, y);
+    if (clickedPolygon) {
+        // 选中该多边形并填充当前颜色/透明度
+        drawingState.clearSelection();
+        clickedPolygon.isSelected = true;
+        drawingState.selectedPolygons.push(clickedPolygon);
+
+        // 应用当前颜色和透明度（drawingState 中应已存有 currentColor / currentOpacity）
+        drawingState.fillSelectedPolygons(drawingState.currentColor, drawingState.currentOpacity);
+
+        // 更新帮助文本
+        if (helpTextElement) {
+            helpTextElement.textContent = `已填充多边形，颜色: ${drawingState.currentColor}，透明度: ${Math.round(drawingState.currentOpacity * 100)}%`;
+        }
+
         // 重绘画布
         redrawCanvas(e.target.getContext('2d'), e.target);
     }

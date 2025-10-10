@@ -1,5 +1,6 @@
 // Toolbar controller for UI interactions
-import { initDrawingLogic, enableDrawing, enableSelectionMode, enableFillMode, clearCanvas } from '../app-layer/drawing-logic.js';
+import { initDrawingLogic, enableDrawing, enableSelectionMode, clearCanvas } from '../app-layer/drawing-logic.js';
+import { redrawCanvas } from '../function-layer/drawing/polygon.js';
 import { setupImportButton } from './file-io/import.js';
 import { exportImage } from './file-io/export.js';
 
@@ -11,15 +12,13 @@ export function initToolbar() {
     // Get toolbar buttons
     const drawBtn = document.getElementById('draw-btn');
     const selectBtn = document.getElementById('select-btn');
-    const fillBtn = document.getElementById('fill-btn');
-    const deleteBtn = document.getElementById('delete-btn');
     const inferenceBtn = document.getElementById('inference-btn');
     const clearBtn = document.getElementById('clear-btn');
     const importBtn = document.getElementById('import-btn');
     const exportBtn = document.getElementById('export-btn');
     
     // Add active class to track current tool
-    const toolButtons = [drawBtn, selectBtn, fillBtn, deleteBtn, inferenceBtn];
+    const toolButtons = [drawBtn, selectBtn, inferenceBtn];
     
     // Store reference to canvas for external access
     window.appCanvas = canvas;
@@ -27,56 +26,33 @@ export function initToolbar() {
     // Helper function to set active button
     function setActiveButton(activeBtn) {
         toolButtons.forEach(btn => {
-            btn.classList.remove('active');
+            if (btn && btn.classList) {
+                btn.classList.remove('active');
+            }
         });
-        if (activeBtn) {
+        if (activeBtn && activeBtn.classList) {
             activeBtn.classList.add('active');
         }
     }
     
-    // Function to enable/disable drawing tools with optional color
-    function setDrawingToolsEnabled(enabled, color = null) {
-        [drawBtn, selectBtn, fillBtn, inferenceBtn, clearBtn, exportBtn].forEach(btn => {
+    // Function to enable/disable drawing tools
+    function setDrawingToolsEnabled(enabled) {
+        [drawBtn, selectBtn, inferenceBtn, clearBtn, exportBtn].forEach(btn => {
             if (btn) {
                 btn.disabled = !enabled;
                 if (enabled) {
                     btn.style.opacity = '1';
                     btn.style.cursor = 'pointer';
-                    
-                    // Apply extracted color if provided
-                    if (color) {
-                        btn.style.backgroundColor = color;
-                        btn.style.borderColor = color;
-                        btn.style.color = getContrastColor(color); // Ensure text is readable
-                    }
                 } else {
                     btn.style.opacity = '0.5';
                     btn.style.cursor = 'not-allowed';
-                    // Reset to default styles when disabled
-                    btn.style.backgroundColor = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
                 }
             }
         });
     }
     
-    // Helper function to get contrasting text color
-    function getContrastColor(hexColor) {
-        // Convert hex to RGB
-        const r = parseInt(hexColor.slice(1, 3), 16);
-        const g = parseInt(hexColor.slice(3, 5), 16);
-        const b = parseInt(hexColor.slice(5, 7), 16);
-        
-        // Calculate luminance
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        
-        // Return white or black based on luminance
-        return luminance > 0.5 ? '#000000' : '#ffffff';
-    }
-    
-    // Initially disable drawing tools (waiting for image import)
-    setDrawingToolsEnabled(false);
+    // Initially enable all tools (no longer disabling before import)
+    setDrawingToolsEnabled(true);
     
     // Add event listeners
     if (drawBtn) {
@@ -97,51 +73,25 @@ export function initToolbar() {
         });
     }
 
-    if (fillBtn) {
-        fillBtn.addEventListener('click', () => {
-            if (!fillBtn.disabled) {
-                enableFillMode();
-                setActiveButton(fillBtn);
-            }
-        });
-    }
-
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-            // 调用全局删除逻辑
-            if (!deleteBtn.disabled && window.appCanvas && window.appCanvas.drawingState) {
-                // 复用 app-layer/drawing-logic.js 的 deleteSelectedPolygons
-                if (window.deleteSelectedPolygons) {
-                    window.deleteSelectedPolygons();
-                }
-            }
-        });
-    }
-
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
             if (!clearBtn.disabled && confirm('确定要清空画布吗？')) {
                 clearCanvas();
-                // After clearing, reset button colors to default
-                setDrawingToolsEnabled(false);
             }
         });
     }
     
-    // Setup import/export with callback for enabling tools
-    setupImportButton(canvas, (extractedColor) => {
-        // This callback is called when image is successfully imported
-        setDrawingToolsEnabled(true, extractedColor);
+    // Setup import/export
+    setupImportButton(canvas, () => {
+        // Update status message after import
+        const statusElement = document.getElementById('tool-status');
+        if (statusElement) {
+            statusElement.textContent = '图像已导入，可以使用绘图工具';
+        }
         
         // Set draw as default active tool after import
         if (drawBtn && !drawBtn.disabled) {
             drawBtn.click();
-        }
-        
-        // Update status message
-        const statusElement = document.getElementById('tool-status');
-        if (statusElement) {
-            statusElement.textContent = '图像已导入，可以使用绘图工具';
         }
     });
     
@@ -153,28 +103,164 @@ export function initToolbar() {
         });
     }
     
-    // Set import as the only initially enabled button
-    if (importBtn) {
-        importBtn.disabled = false;
-        importBtn.style.opacity = '1';
-        importBtn.style.cursor = 'pointer';
-        
-        // Add visual indicator that import is required first
-        const helpText = document.getElementById('help-text') || document.createElement('div');
-        if (!document.getElementById('help-text')) {
-            helpText.id = 'help-text';
-            helpText.style.padding = '10px';
-            helpText.style.textAlign = 'center';
-            helpText.style.color = '#666';
-            document.querySelector('.toolbar').appendChild(helpText);
-        }
-        helpText.textContent = '请先导入图像开始绘图';
-    }
+    // Initialize tag management
+    initTagManagement();
     
     return {
-        setDrawingToolsEnabled, // Export this function for external use
+        setDrawingToolsEnabled,
         canvas
     };
+}
+
+// Initialize tag management system
+function initTagManagement() {
+    const tagNameInput = document.getElementById('tag-name-input');
+    const tagColorInput = document.getElementById('tag-color-input');
+    const tagOpacityInput = document.getElementById('tag-opacity-input');
+    const tagOpacityValue = document.getElementById('tag-opacity-value');
+    const addTagBtn = document.getElementById('add-tag-btn');
+    const tagsList = document.getElementById('tags-list');
+
+    // Store tags and current selected tag
+    window.tags = [];
+    window.currentTag = null;
+
+    // Add tag button event (only when elements exist)
+    if (addTagBtn && tagNameInput && tagColorInput && tagsList) {
+        addTagBtn.addEventListener('click', () => {
+            const name = tagNameInput.value.trim();
+            const color = tagColorInput.value;
+            const opacity = (tagOpacityInput && !isNaN(parseFloat(tagOpacityInput.value))) ? parseFloat(tagOpacityInput.value) : 1;
+
+            if (!name) {
+                alert('\u8bf7\u8f93\u5165\u6807\u7b7e\u540d\u79f0');
+                return;
+            }
+
+            // Check if tag name already exists
+            if (window.tags.some(tag => tag.name === name)) {
+                alert('\u6807\u7b7e\u540d\u79f0\u5df2\u5b58\u5728');
+                return;
+            }
+
+            // Create new tag
+            const newTag = { name, color, opacity };
+            window.tags.push(newTag);
+
+            // Add tag to UI
+            const tagElement = document.createElement('div');
+            tagElement.className = 'tag-item';
+            tagElement.innerHTML = `
+                <span class="tag-color" style="background-color: ${color}; opacity: ${opacity}"></span>
+                <span class="tag-name">${name}</span>
+            `;
+
+            // Select tag on click
+            tagElement.addEventListener('click', () => {
+                selectTag(newTag);
+            });
+
+            tagsList.appendChild(tagElement);
+
+            // add delete button for the tag
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'tag-delete';
+            deleteBtn.title = '删除标签';
+            deleteBtn.textContent = '删除';
+            deleteBtn.style.marginLeft = '8px';
+            deleteBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                // remove from tags array
+                window.tags = window.tags.filter(t => t.name !== newTag.name);
+                // remove element from DOM
+                if (tagElement.parentNode) tagElement.parentNode.removeChild(tagElement);
+                // remove polygons that used this tag
+                if (window.appCanvas && window.appCanvas.drawingState) {
+                    const ds = window.appCanvas.drawingState;
+                    ds.polygons = ds.polygons.filter(p => p.tagName !== newTag.name);
+                    // also remove from selectedPolygons if any
+                    ds.selectedPolygons = ds.selectedPolygons.filter(p => p.tagName !== newTag.name);
+                    // redraw canvas
+                    const ctx = window.appCanvas.getContext('2d');
+                    redrawCanvas(ctx, window.appCanvas);
+                }
+                // if deleted tag was current, clear selection
+                if (window.currentTag && window.currentTag.name === newTag.name) {
+                    window.currentTag = null;
+                    // clear drawing state's color/opactiy to defaults if available
+                    if (window.appCanvas && window.appCanvas.drawingState) {
+                        window.appCanvas.drawingState.currentColor = '#4a90e2';
+                        window.appCanvas.drawingState.currentOpacity = 1;
+                        if (window.appCanvas) {
+                            const ctx = window.appCanvas.getContext('2d');
+                            redrawCanvas(ctx, window.appCanvas);
+                        }
+                    }
+                    const statusElement = document.getElementById('tool-status');
+                    if (statusElement) statusElement.textContent = '当前标签: 无';
+                }
+            });
+            tagElement.appendChild(deleteBtn);
+
+            // Clear input
+            tagNameInput.value = '';
+
+            // Select this tag if it's the first one
+            if (window.tags.length === 1) {
+                selectTag(newTag);
+            }
+        });
+    }
+    // update opacity display when slider changes (if present)
+    if (tagOpacityInput && tagOpacityValue) {
+        tagOpacityInput.addEventListener('input', () => {
+            const v = parseFloat(tagOpacityInput.value);
+            tagOpacityValue.textContent = `${Math.round(v * 100)}%`;
+        });
+    }
+}
+function selectTag(tag) {
+    // remove selected class from all tag items
+    document.querySelectorAll('.tag-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+
+    // find and mark the matching tag element
+    const tagElements = document.querySelectorAll('.tag-item');
+    for (const element of tagElements) {
+        const nameElement = element.querySelector('.tag-name');
+        if (nameElement && nameElement.textContent === tag.name) {
+            element.classList.add('selected');
+            break;
+        }
+    }
+
+    // set current tag globally
+    window.currentTag = tag;
+
+    // update drawing state with tag color and opacity
+    if (window.appCanvas && window.appCanvas.drawingState) {
+        window.appCanvas.drawingState.currentColor = tag.color;
+        if (typeof tag.opacity === 'number') {
+            window.appCanvas.drawingState.currentOpacity = tag.opacity;
+        }
+    }
+
+    // Update status
+    const statusElement = document.getElementById('tool-status');
+    if (statusElement) {
+        statusElement.textContent = `当前标签: ${tag.name}`;
+    }
+
+    // Also update any global color/opacity inputs if present
+    const globalColorInput = document.getElementById('color-input');
+    const globalOpacityInput = document.getElementById('opacity-input');
+    const globalOpacityValue = document.getElementById('opacity-value');
+    if (globalColorInput) globalColorInput.value = tag.color;
+    if (globalOpacityInput && typeof tag.opacity === 'number') {
+        globalOpacityInput.value = tag.opacity;
+        if (globalOpacityValue) globalOpacityValue.textContent = `${Math.round(tag.opacity * 100)}%`;
+    }
 }
 
 // Function to check if tools are enabled (for external modules)

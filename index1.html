@@ -13,37 +13,36 @@
         <span>版本 1.0</span>
     </div>
 
-    <!-- 主容器：侧边栏、画布和属性面板 -->
+    <!-- 主容器：侧边栏、画布和标签面板 -->
     <div id="main-container">
         <!-- 左侧侧边栏：工具按钮 -->
         <div id="sidebar">
             <button id="draw-btn" class="active" title="绘制多边形">绘制</button>
             <button id="select-btn" title="选择多边形">选择</button>
-            <button id="fill-btn" title="填充多边形">填充</button>
-            <button id="delete-btn" title="删除多边形">删除</button>
             <button id="inference-btn" title="AI推理">推理</button>
             <button id="clear-btn" title="清空画布">清空</button>
             <button id="import-btn" title="导入图像">导入图像</button>
             <button id="export-btn" title="导出图像">导出图像</button>
+            
+            <!-- 标签管理区域 -->
+            <div id="tag-management">
+                <h3>标签管理</h3>
+                <div class="tag-inputs">
+                    <input type="text" id="tag-name-input" placeholder="标签名称">
+                    <input type="color" id="tag-color-input" value="#4a90e2">
+                    <input type="range" id="tag-opacity-input" min="0" max="1" step="0.1" value="1" title="透明度">
+                    <span id="tag-opacity-value">100%</span>
+                    <button id="add-tag-btn">添加标签</button>
+                </div>
+                <div id="tags-list">
+                    <!-- 标签将动态添加到这里 -->
+                </div>
+            </div>
         </div>
 
         <!-- 中间画布区域 -->
         <div id="canvas-container">
             <canvas id="canvas" width="800" height="600"></canvas>
-        </div>
-
-        <!-- 右侧属性面板：颜色和透明度设置 -->
-        <div id="properties-panel">
-            <div class="section">
-                <label for="color-input">颜色:</label>
-                <input type="color" id="color-input" value="#000000">
-            </div>
-            <div class="section">
-                <label for="opacity-input">透明度:</label>
-                <input type="range" id="opacity-input" min="0" max="1" step="0.1" value="1">
-                <div class="value-display" id="opacity-value">100%</div>
-            </div>
-            <!-- 可以添加更多属性设置，如笔刷大小、图层等 -->
         </div>
     </div>
 

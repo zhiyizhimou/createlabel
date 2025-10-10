@@ -39,6 +39,15 @@ export class DrawingState {
      */
     finishCurrentPolygon() {
         if (this.currentPolygon && this.currentPolygon.vertices.length >= 3) {
+            // Apply current drawing color and opacity to the polygon so it is filled
+            if (this.currentColor) this.currentPolygon.fillColor = this.currentColor;
+            if (typeof this.currentOpacity === 'number') this.currentPolygon.fillOpacity = this.currentOpacity;
+            // attach tagName if a global currentTag exists
+            try {
+                this.currentPolygon.tagName = (window.currentTag && window.currentTag.name) ? window.currentTag.name : null;
+            } catch (e) {
+                this.currentPolygon.tagName = null;
+            }
             this.polygons.push(this.currentPolygon);
             this.currentPolygon = null;
         }
@@ -80,6 +89,11 @@ export class DrawingState {
         this.selectedPolygons.forEach(p => {
             p.fillColor = color;
             p.fillOpacity = opacity;
+            try {
+                p.tagName = (window.currentTag && window.currentTag.name) ? window.currentTag.name : p.tagName || null;
+            } catch (e) {
+                // ignore
+            }
         });
     }
 
@@ -278,8 +292,8 @@ export class Polygon {
         ctx.strokeStyle = this.isSelected ? '#FF0000' : '#000000';
         ctx.stroke();
         
-        // 如果有填充颜色且顶点数>=3，则填充多边形
-        if (this.fillColor && this.vertices.length >= 3) {
+        // 只有已完成的多边形（非当前绘制）才进行填充
+        if (!isCurrent && this.fillColor && this.vertices.length >= 3) {
             ctx.fillStyle = this.fillColor;
             ctx.globalAlpha = this.fillOpacity;
             ctx.fill();
