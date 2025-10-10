@@ -68,6 +68,7 @@ body {
     font-size: 1.1rem; /* 激活状态更大 */
 }
 
+<<<<<<< HEAD
 /* 标签管理样式 */
 .tag-item {
     display: flex;
@@ -153,6 +154,8 @@ body {
     color: #666;
 }
 
+=======
+>>>>>>> 5f22df0189a14bc95f354d8b857305c84fefc512
 /* 画布区域 */
 #canvas-container {
     flex: 1;
