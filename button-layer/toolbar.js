@@ -233,9 +233,18 @@ function initTagManagement() {
             editPanel.className = 'tag-edit-panel';
             editPanel.style.display = 'none';
 
+            // build edit panel with vertical layout: color on top, opacity under it, then actions
             const editColor = document.createElement('input');
             editColor.type = 'color';
             editColor.value = color;
+
+            const editColorWrapper = document.createElement('div');
+            editColorWrapper.className = 'tag-edit-row';
+            const editColorLabel = document.createElement('label');
+            editColorLabel.textContent = '颜色';
+            editColorLabel.className = 'tag-edit-label';
+            editColorWrapper.appendChild(editColorLabel);
+            editColorWrapper.appendChild(editColor);
 
             const editOpacity = document.createElement('input');
             editOpacity.type = 'range';
@@ -244,9 +253,17 @@ function initTagManagement() {
             editOpacity.step = 0.1;
             editOpacity.value = String(opacity);
 
+            const editOpacityWrapper = document.createElement('div');
+            editOpacityWrapper.className = 'tag-edit-row';
+            const editOpacityLabelElm = document.createElement('label');
+            editOpacityLabelElm.textContent = '透明度';
+            editOpacityLabelElm.className = 'tag-edit-label';
             const editOpacityLabel = document.createElement('span');
             editOpacityLabel.className = 'tag-opacity-label-small';
             editOpacityLabel.textContent = `${Math.round(opacity * 100)}%`;
+            editOpacityWrapper.appendChild(editOpacityLabelElm);
+            editOpacityWrapper.appendChild(editOpacity);
+            editOpacityWrapper.appendChild(editOpacityLabel);
 
             const saveBtn = document.createElement('button');
             saveBtn.textContent = '保存';
@@ -256,11 +273,13 @@ function initTagManagement() {
             cancelBtn.textContent = '取消';
             cancelBtn.className = 'tag-cancel-btn';
 
-            editPanel.appendChild(editColor);
-            editPanel.appendChild(editOpacity);
-            editPanel.appendChild(editOpacityLabel);
-            editPanel.appendChild(saveBtn);
-            editPanel.appendChild(cancelBtn);
+            editPanel.appendChild(editColorWrapper);
+            editPanel.appendChild(editOpacityWrapper);
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'tag-edit-actions';
+            actionsDiv.appendChild(saveBtn);
+            actionsDiv.appendChild(cancelBtn);
+            editPanel.appendChild(actionsDiv);
 
             tagElement.appendChild(editPanel);
 
