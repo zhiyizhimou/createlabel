@@ -116,6 +116,43 @@ body {
     opacity: 0.9;
 }
 
+.tag-edit-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+.tag-edit-panel {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+}
+.tag-edit-panel input[type="range"] {
+    width: 80px;
+}
+.tag-save-btn, .tag-cancel-btn {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+.tag-save-btn {
+    background: #1976d2;
+    color: white;
+}
+.tag-cancel-btn {
+    background: #f5f5f5;
+}
+.tag-opacity-label-small {
+    font-size: 0.75rem;
+    color: #666;
+}
+
 /* 画布区域 */
 #canvas-container {
     flex: 1;
