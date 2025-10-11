@@ -4,6 +4,384 @@ import { redrawCanvas } from '../function-layer/drawing/polygon.js';
 import { setupImportButton } from './file-io/import.js';
 import { exportImage } from './file-io/export.js';
 
+// 将模态框相关变量提升到模块作用域
+let currentEditingTag = null;
+let isEditingMode = false;
+
+// 显示模态框函数（提升到模块作用域）
+function showModal(tag = null) {
+    const modal = document.getElementById('tag-modal');
+    const modalTitle = document.querySelector('.modal-header h3');
+    const addTagBtn = document.getElementById('add-tag-btn');
+    const tagNameInput = document.getElementById('tag-name-input');
+    const tagColorInput = document.getElementById('tag-color-input');
+    const tagOpacityInput = document.getElementById('tag-opacity-input');
+    const tagOpacityValue = document.getElementById('tag-opacity-value');
+    
+    if (!modal) return;
+    
+    modal.style.display = 'block';
+    
+    if (tag) {
+        // 编辑模式
+        isEditingMode = true;
+        currentEditingTag = tag;
+        modalTitle.textContent = '编辑标签';
+        addTagBtn.textContent = '更新标签';
+        
+        // 填充现有数据
+        tagNameInput.value = tag.name;
+        tagColorInput.value = tag.color;
+        tagOpacityInput.value = String(tag.opacity);
+        tagOpacityValue.textContent = `${Math.round(tag.opacity * 100)}%`;
+    } else {
+        // 添加模式
+        isEditingMode = false;
+        currentEditingTag = null;
+        modalTitle.textContent = '添加新标签';
+        addTagBtn.textContent = '添加标签';
+        
+        // 清空输入
+        tagNameInput.value = '';
+        tagColorInput.value = '#4a90e2';
+        tagOpacityInput.value = '1';
+        tagOpacityValue.textContent = '100%';
+    }
+    
+    tagNameInput.focus();
+}
+
+// 隐藏模态框函数（提升到模块作用域）
+function hideModal() {
+    const modal = document.getElementById('tag-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    isEditingMode = false;
+    currentEditingTag = null;
+}
+
+// 标签管理功能
+function initTagManagement() {
+    const showModalBtn = document.getElementById('show-add-tag-modal');
+    const modal = document.getElementById('tag-modal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const cancelBtn = document.getElementById('cancel-add-tag');
+    const addTagBtn = document.getElementById('add-tag-btn');
+    const tagNameInput = document.getElementById('tag-name-input');
+    const tagColorInput = document.getElementById('tag-color-input');
+    const tagOpacityInput = document.getElementById('tag-opacity-input');
+    const tagOpacityValue = document.getElementById('tag-opacity-value');
+    const tagsList = document.getElementById('tags-list');
+
+    // Store tags and current selected tag
+    window.tags = [];
+    window.currentTag = null;
+    
+    // 模态框事件监听
+    if (showModalBtn) {
+        showModalBtn.addEventListener('click', () => showModal());
+    }
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', hideModal);
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', hideModal);
+    }
+
+    // 点击模态框外部关闭
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+    }
+
+    // 透明度滑块事件
+    if (tagOpacityInput && tagOpacityValue) {
+        tagOpacityInput.addEventListener('input', () => {
+            const v = parseFloat(tagOpacityInput.value);
+            tagOpacityValue.textContent = `${Math.round(v * 100)}%`;
+        });
+    }
+
+    // 添加/更新标签按钮事件
+    if (addTagBtn && tagNameInput && tagColorInput && tagsList) {
+        addTagBtn.addEventListener('click', () => {
+            const name = tagNameInput.value.trim();
+            const color = tagColorInput.value;
+            const opacity = parseFloat(tagOpacityInput.value) || 1;
+
+            if (!name) {
+                alert('请输入标签名称');
+                return;
+            }
+
+            if (isEditingMode && currentEditingTag) {
+                // 编辑模式：更新现有标签
+                // 检查名称是否重复（排除自身）
+                if (window.tags.some(tag => tag.name === name && tag !== currentEditingTag)) {
+                    alert('标签名称已存在');
+                    return;
+                }
+
+                // 保存旧名称用于更新多边形引用
+                const oldName = currentEditingTag.name;
+                
+                // 更新标签属性
+                currentEditingTag.name = name;
+                currentEditingTag.color = color;
+                currentEditingTag.opacity = opacity;
+
+                // 更新UI中的标签元素
+                updateTagElement(currentEditingTag, oldName);
+
+                // 如果当前正在使用的标签被编辑，更新绘图状态
+                if (window.currentTag && window.currentTag.name === oldName) {
+                    window.currentTag = currentEditingTag;
+                    if (window.appCanvas && window.appCanvas.drawingState) {
+                        window.appCanvas.drawingState.currentColor = color;
+                        window.appCanvas.drawingState.currentOpacity = opacity;
+                    }
+                }
+
+                // 更新所有使用该标签的多边形
+                if (window.appCanvas && window.appCanvas.drawingState) {
+                    const ds = window.appCanvas.drawingState;
+                    ds.polygons.forEach(p => {
+                        if (p.tagName === oldName) {
+                            p.tagName = name;
+                            p.fillColor = color;
+                            p.fillOpacity = opacity;
+                        }
+                    });
+                    
+                    // 重绘画布
+                    const ctx = window.appCanvas.getContext('2d');
+                    redrawCanvas(ctx, window.appCanvas);
+                }
+
+            } else {
+                // 添加模式：创建新标签
+                if (window.tags.some(tag => tag.name === name)) {
+                    alert('标签名称已存在');
+                    return;
+                }
+
+                const newTag = { name, color, opacity };
+                window.tags.push(newTag);
+                createTagElement(newTag, tagsList);
+
+                // 如果是第一个标签，自动选中
+                if (window.tags.length === 1) {
+                    selectTag(newTag);
+                }
+            }
+
+            // 关闭模态窗
+            hideModal();
+        });
+    }
+}
+
+// 更新标签元素的函数
+function updateTagElement(tag, oldName = null) {
+    const tagElements = document.querySelectorAll('.tag-item');
+    for (const element of tagElements) {
+        const nameElement = element.querySelector('.tag-name');
+        if (nameElement && (nameElement.textContent === (oldName || tag.name))) {
+            // 更新名称
+            nameElement.textContent = tag.name;
+            
+            // 更新颜色样本和透明度显示
+            const colorSwatch = element.querySelector('.tag-swatch');
+            const opacityLabel = element.querySelector('.tag-opacity-label');
+            
+            if (colorSwatch) {
+                colorSwatch.style.backgroundColor = tag.color;
+                colorSwatch.style.opacity = String(tag.opacity);
+            }
+            
+            if (opacityLabel) {
+                opacityLabel.textContent = `${Math.round(tag.opacity * 100)}%`;
+            }
+            
+            break;
+        }
+    }
+}
+
+// 创建标签UI元素
+function createTagElement(tag, tagsList) {
+    const tagElement = document.createElement('div');
+    tagElement.className = 'tag-item';
+
+    // 创建左侧信息容器（只包含标签名称）
+    const tagInfo = document.createElement('div');
+    tagInfo.className = 'tag-info';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'tag-name';
+    nameSpan.textContent = tag.name;
+
+    tagInfo.appendChild(nameSpan);
+
+    // 创建右侧内容容器（包含元数据和操作按钮）
+    const rightContent = document.createElement('div');
+    rightContent.className = 'tag-right-content';
+
+    // 元数据部分
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'tag-meta';
+
+    const opacityLabel = document.createElement('span');
+    opacityLabel.className = 'tag-opacity-label';
+    opacityLabel.textContent = `${Math.round(tag.opacity * 100)}%`;
+
+    const colorSwatch = document.createElement('span');
+    colorSwatch.className = 'tag-swatch';
+    colorSwatch.style.backgroundColor = tag.color;
+    colorSwatch.style.opacity = String(tag.opacity);
+
+    metaDiv.appendChild(opacityLabel);
+    metaDiv.appendChild(colorSwatch);
+
+    // 操作按钮容器
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = 'tag-actions';
+
+    // 将元数据和操作按钮添加到右侧内容容器
+    rightContent.appendChild(metaDiv);
+    rightContent.appendChild(actionsContainer);
+
+    // 将左侧信息容器和右侧内容容器添加到标签项
+    tagElement.appendChild(tagInfo);
+    tagElement.appendChild(rightContent);
+
+    // Select tag on click
+    tagElement.addEventListener('click', () => {
+        selectTag(tag);
+    });
+
+    tagsList.appendChild(tagElement);
+
+    // 添加删除按钮
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'tag-action-btn tag-delete';
+    deleteBtn.title = '删除标签';
+    deleteBtn.textContent = '删除';
+    deleteBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        // remove from tags array
+        window.tags = window.tags.filter(t => t.name !== tag.name);
+        // remove element from DOM
+        if (tagElement.parentNode) tagElement.parentNode.removeChild(tagElement);
+        // remove polygons that used this tag
+        if (window.appCanvas && window.appCanvas.drawingState) {
+            const ds = window.appCanvas.drawingState;
+            ds.polygons = ds.polygons.filter(p => p.tagName !== tag.name);
+            // also remove from selectedPolygons if any
+            ds.selectedPolygons = ds.selectedPolygons.filter(p => p.tagName !== tag.name);
+            // redraw canvas
+            const ctx = window.appCanvas.getContext('2d');
+            redrawCanvas(ctx, window.appCanvas);
+        }
+        // if deleted tag was current, clear selection
+        if (window.currentTag && window.currentTag.name === tag.name) {
+            window.currentTag = null;
+            // clear drawing state's color/opactiy to defaults if available
+            if (window.appCanvas && window.appCanvas.drawingState) {
+                window.appCanvas.drawingState.currentColor = '#4a90e2';
+                window.appCanvas.drawingState.currentOpacity = 1;
+                if (window.appCanvas) {
+                    const ctx = window.appCanvas.getContext('2d');
+                    redrawCanvas(ctx, window.appCanvas);
+                }
+            }
+            const statusElement = document.getElementById('tool-status');
+            if (statusElement) statusElement.textContent = '当前标签: 无';
+        }
+    });
+    actionsContainer.appendChild(deleteBtn);
+
+    // 添加显示/隐藏按钮
+    const visBtn = document.createElement('button');
+    visBtn.className = 'btn-ghost';
+    visBtn.title = '显示/隐藏 标签绘制';
+    visBtn.innerHTML = '👁';
+    visBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        tag.visible = !tag.visible;
+        visBtn.style.opacity = tag.visible ? '1' : '0.35';
+        // redraw canvas (exclude hidden if any)
+        if (window.appCanvas) {
+            const ctx = window.appCanvas.getContext('2d');
+            redrawCanvas(ctx, window.appCanvas);
+        }
+    });
+    actionsContainer.appendChild(visBtn);
+
+    // 添加编辑按钮
+    const editBtn = document.createElement('button');
+    editBtn.className = 'tag-action-btn tag-edit-btn';
+    editBtn.title = '编辑标签';
+    editBtn.textContent = '编辑';
+    editBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        // 使用模态窗进行编辑 - 现在可以正确调用showModal
+        showModal(tag);
+    });
+    actionsContainer.appendChild(editBtn);
+}
+
+// 选择标签函数
+function selectTag(tag) {
+    // remove selected class from all tag items
+    document.querySelectorAll('.tag-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+
+    // find and mark the matching tag element
+    const tagElements = document.querySelectorAll('.tag-item');
+    for (const element of tagElements) {
+        const nameElement = element.querySelector('.tag-name');
+        if (nameElement && nameElement.textContent === tag.name) {
+            element.classList.add('selected');
+            break;
+        }
+    }
+
+    // set current tag globally
+    window.currentTag = tag;
+
+    // update drawing state with tag color and opacity
+    if (window.appCanvas && window.appCanvas.drawingState) {
+        window.appCanvas.drawingState.currentColor = tag.color;
+        if (typeof tag.opacity === 'number') {
+            window.appCanvas.drawingState.currentOpacity = tag.opacity;
+        }
+    }
+
+    // Update status
+    const statusElement = document.getElementById('tool-status');
+    if (statusElement) {
+        statusElement.textContent = `当前标签: ${tag.name}`;
+    }
+
+    // Also update any global color/opacity inputs if present
+    const globalColorInput = document.getElementById('color-input');
+    const globalOpacityInput = document.getElementById('opacity-input');
+    const globalOpacityValue = document.getElementById('opacity-value');
+    if (globalColorInput) globalColorInput.value = tag.color;
+    if (globalOpacityInput && typeof tag.opacity === 'number') {
+        globalOpacityInput.value = tag.opacity;
+        if (globalOpacityValue) globalOpacityValue.textContent = `${Math.round(tag.opacity * 100)}%`;
+    }
+}
+
 // Initialize toolbar
 export function initToolbar() {
     // Initialize drawing logic
@@ -51,7 +429,7 @@ export function initToolbar() {
         });
     }
     
-    // Initially enable all tools (no longer disabling before import)
+    // Initially enable all tools
     setDrawingToolsEnabled(true);
     
     // Add event listeners
@@ -112,327 +490,11 @@ export function initToolbar() {
     };
 }
 
-// Initialize tag management system
-function initTagManagement() {
-    const tagNameInput = document.getElementById('tag-name-input');
-    const tagColorInput = document.getElementById('tag-color-input');
-    const tagOpacityInput = document.getElementById('tag-opacity-input');
-    const tagOpacityValue = document.getElementById('tag-opacity-value');
-    const addTagBtn = document.getElementById('add-tag-btn');
-    const tagsList = document.getElementById('tags-list');
-
-    // Store tags and current selected tag
-    window.tags = [];
-    window.currentTag = null;
-
-    // Add tag button event (only when elements exist)
-    if (addTagBtn && tagNameInput && tagColorInput && tagsList) {
-        addTagBtn.addEventListener('click', () => {
-            const name = tagNameInput.value.trim();
-            const color = tagColorInput.value;
-            const opacity = (tagOpacityInput && !isNaN(parseFloat(tagOpacityInput.value))) ? parseFloat(tagOpacityInput.value) : 1;
-
-            if (!name) {
-                alert('\u8bf7\u8f93\u5165\u6807\u7b7e\u540d\u79f0');
-                return;
-            }
-
-            // Check if tag name already exists
-            if (window.tags.some(tag => tag.name === name)) {
-                alert('\u6807\u7b7e\u540d\u79f0\u5df2\u5b58\u5728');
-                return;
-            }
-
-            // Create new tag
-            const newTag = { name, color, opacity };
-            window.tags.push(newTag);
-
-            // Add tag to UI -- create elements so we can reference them later
-            const tagElement = document.createElement('div');
-            tagElement.className = 'tag-item';
-
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'tag-name';
-            nameSpan.textContent = name;
-
-            const metaDiv = document.createElement('div');
-            metaDiv.className = 'tag-meta';
-
-            const opacityLabel = document.createElement('span');
-            opacityLabel.className = 'tag-opacity-label';
-            opacityLabel.textContent = `${Math.round(opacity * 100)}%`;
-
-            const colorSwatch = document.createElement('span');
-            colorSwatch.className = 'tag-color';
-            colorSwatch.style.backgroundColor = color;
-            colorSwatch.style.opacity = String(opacity);
-
-            // visible flag default true
-            newTag.visible = true;
-
-            metaDiv.appendChild(opacityLabel);
-            metaDiv.appendChild(colorSwatch);
-
-            tagElement.appendChild(nameSpan);
-            tagElement.appendChild(metaDiv);
-
-            // Select tag on click
-            tagElement.addEventListener('click', () => {
-                selectTag(newTag);
-            });
-
-            tagsList.appendChild(tagElement);
-
-            // add delete button for the tag
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'tag-delete';
-            deleteBtn.title = '删除标签';
-            deleteBtn.textContent = '删除';
-            deleteBtn.style.marginLeft = '8px';
-            deleteBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                // remove from tags array
-                window.tags = window.tags.filter(t => t.name !== newTag.name);
-                // remove element from DOM
-                if (tagElement.parentNode) tagElement.parentNode.removeChild(tagElement);
-                // remove polygons that used this tag
-                if (window.appCanvas && window.appCanvas.drawingState) {
-                    const ds = window.appCanvas.drawingState;
-                    ds.polygons = ds.polygons.filter(p => p.tagName !== newTag.name);
-                    // also remove from selectedPolygons if any
-                    ds.selectedPolygons = ds.selectedPolygons.filter(p => p.tagName !== newTag.name);
-                    // redraw canvas
-                    const ctx = window.appCanvas.getContext('2d');
-                    redrawCanvas(ctx, window.appCanvas);
-                }
-                // if deleted tag was current, clear selection
-                if (window.currentTag && window.currentTag.name === newTag.name) {
-                    window.currentTag = null;
-                    // clear drawing state's color/opactiy to defaults if available
-                    if (window.appCanvas && window.appCanvas.drawingState) {
-                        window.appCanvas.drawingState.currentColor = '#4a90e2';
-                        window.appCanvas.drawingState.currentOpacity = 1;
-                        if (window.appCanvas) {
-                            const ctx = window.appCanvas.getContext('2d');
-                            redrawCanvas(ctx, window.appCanvas);
-                        }
-                    }
-                    const statusElement = document.getElementById('tool-status');
-                    if (statusElement) statusElement.textContent = '当前标签: 无';
-                }
-            });
-            tagElement.appendChild(deleteBtn);
-
-            // add visibility toggle (eye icon style)
-            const visBtn = document.createElement('button');
-            visBtn.className = 'btn-ghost';
-            visBtn.title = '显示/隐藏 标签绘制';
-            visBtn.innerHTML = '👁';
-            visBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                newTag.visible = !newTag.visible;
-                visBtn.style.opacity = newTag.visible ? '1' : '0.35';
-                // redraw canvas (exclude hidden if any)
-                if (window.appCanvas) {
-                    const ctx = window.appCanvas.getContext('2d');
-                    redrawCanvas(ctx, window.appCanvas);
-                }
-            });
-            tagElement.appendChild(visBtn);
-
-            // add edit button for the tag
-            const editBtn = document.createElement('button');
-            editBtn.className = 'tag-edit-btn';
-            editBtn.title = '编辑标签';
-            editBtn.textContent = '编辑';
-            editBtn.style.marginLeft = '6px';
-            tagElement.appendChild(editBtn);
-
-            // inline edit panel (hidden by default)
-            const editPanel = document.createElement('div');
-            editPanel.className = 'tag-edit-panel';
-            editPanel.style.display = 'none';
-
-            // build edit panel with vertical layout: color on top, opacity under it, then actions
-            const editColor = document.createElement('input');
-            editColor.type = 'color';
-            editColor.value = color;
-
-            const editColorWrapper = document.createElement('div');
-            editColorWrapper.className = 'tag-edit-row';
-            const editColorLabel = document.createElement('label');
-            editColorLabel.textContent = '颜色';
-            editColorLabel.className = 'tag-edit-label';
-            editColorWrapper.appendChild(editColorLabel);
-            editColorWrapper.appendChild(editColor);
-
-            const editOpacity = document.createElement('input');
-            editOpacity.type = 'range';
-            editOpacity.min = 0;
-            editOpacity.max = 1;
-            editOpacity.step = 0.1;
-            editOpacity.value = String(opacity);
-
-            const editOpacityWrapper = document.createElement('div');
-            editOpacityWrapper.className = 'tag-edit-row';
-            const editOpacityLabelElm = document.createElement('label');
-            editOpacityLabelElm.textContent = '透明度';
-            editOpacityLabelElm.className = 'tag-edit-label';
-            const editOpacityLabel = document.createElement('span');
-            editOpacityLabel.className = 'tag-opacity-label-small';
-            editOpacityLabel.textContent = `${Math.round(opacity * 100)}%`;
-            editOpacityWrapper.appendChild(editOpacityLabelElm);
-            editOpacityWrapper.appendChild(editOpacity);
-            editOpacityWrapper.appendChild(editOpacityLabel);
-
-            const saveBtn = document.createElement('button');
-            saveBtn.textContent = '保存';
-            saveBtn.className = 'tag-save-btn';
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.textContent = '取消';
-            cancelBtn.className = 'tag-cancel-btn';
-
-            editPanel.appendChild(editColorWrapper);
-            editPanel.appendChild(editOpacityWrapper);
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'tag-edit-actions';
-            actionsDiv.appendChild(saveBtn);
-            actionsDiv.appendChild(cancelBtn);
-            editPanel.appendChild(actionsDiv);
-
-            tagElement.appendChild(editPanel);
-
-            // toggle edit panel
-            editBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                const willShow = editPanel.style.display === 'none';
-                editPanel.style.display = willShow ? 'flex' : 'none';
-                // After UI layout changes, request animation frame twice to ensure layout stabilized, then resize canvas
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
-                }));
-            });
-
-            // live update while editing
-            function applyLiveUpdate(newColor, newOpacity) {
-                // update tag object
-                newTag.color = newColor;
-                newTag.opacity = newOpacity;
-
-                // update UI swatch and opacity label
-                colorSwatch.style.backgroundColor = newColor;
-                colorSwatch.style.opacity = String(newOpacity);
-                opacityLabel.textContent = `${Math.round(newOpacity * 100)}%`;
-                editOpacityLabel.textContent = `${Math.round(newOpacity * 100)}%`;
-
-                // if this tag is currentTag, update drawingState
-                if (window.currentTag && window.currentTag.name === newTag.name) {
-                    window.appCanvas.drawingState.currentColor = newColor;
-                    window.appCanvas.drawingState.currentOpacity = newOpacity;
-                }
-
-                // update all polygons that use this tag
-                if (window.appCanvas && window.appCanvas.drawingState) {
-                    const ds = window.appCanvas.drawingState;
-                    ds.polygons.forEach(p => {
-                        if (p.tagName === newTag.name) {
-                            p.fillColor = newColor;
-                            p.fillOpacity = newOpacity;
-                        }
-                    });
-                    // redraw
-                    const ctx = window.appCanvas.getContext('2d');
-                    redrawCanvas(ctx, window.appCanvas);
-                }
-            }
-
-            editColor.addEventListener('input', () => applyLiveUpdate(editColor.value, parseFloat(editOpacity.value)));
-            editOpacity.addEventListener('input', () => applyLiveUpdate(editColor.value, parseFloat(editOpacity.value)));
-
-            // save/cancel
-            saveBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                editPanel.style.display = 'none';
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
-                }));
-            });
-            cancelBtn.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                // revert UI to tag values
-                editColor.value = newTag.color;
-                editOpacity.value = String(newTag.opacity);
-                applyLiveUpdate(newTag.color, newTag.opacity);
-                editPanel.style.display = 'none';
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    if (window && typeof resizeCanvas === 'function') resizeCanvas();
-                }));
-            });
-
-            // Clear input
-            tagNameInput.value = '';
-
-            // Select this tag if it's the first one
-            if (window.tags.length === 1) {
-                selectTag(newTag);
-            }
-        });
-    }
-    // update opacity display when slider changes (if present)
-    if (tagOpacityInput && tagOpacityValue) {
-        tagOpacityInput.addEventListener('input', () => {
-            const v = parseFloat(tagOpacityInput.value);
-            tagOpacityValue.textContent = `${Math.round(v * 100)}%`;
-        });
-    }
-}
-function selectTag(tag) {
-    // remove selected class from all tag items
-    document.querySelectorAll('.tag-item').forEach(item => {
-        item.classList.remove('selected');
-    });
-
-    // find and mark the matching tag element
-    const tagElements = document.querySelectorAll('.tag-item');
-    for (const element of tagElements) {
-        const nameElement = element.querySelector('.tag-name');
-        if (nameElement && nameElement.textContent === tag.name) {
-            element.classList.add('selected');
-            break;
-        }
-    }
-
-    // set current tag globally
-    window.currentTag = tag;
-
-    // update drawing state with tag color and opacity
-    if (window.appCanvas && window.appCanvas.drawingState) {
-        window.appCanvas.drawingState.currentColor = tag.color;
-        if (typeof tag.opacity === 'number') {
-            window.appCanvas.drawingState.currentOpacity = tag.opacity;
-        }
-    }
-
-    // Update status
-    const statusElement = document.getElementById('tool-status');
-    if (statusElement) {
-        statusElement.textContent = `当前标签: ${tag.name}`;
-    }
-
-    // Also update any global color/opacity inputs if present
-    const globalColorInput = document.getElementById('color-input');
-    const globalOpacityInput = document.getElementById('opacity-input');
-    const globalOpacityValue = document.getElementById('opacity-value');
-    if (globalColorInput) globalColorInput.value = tag.color;
-    if (globalOpacityInput && typeof tag.opacity === 'number') {
-        globalOpacityInput.value = tag.opacity;
-        if (globalOpacityValue) globalOpacityValue.textContent = `${Math.round(tag.opacity * 100)}%`;
-    }
-}
-
 // Function to check if tools are enabled (for external modules)
 export function areToolsEnabled() {
     const drawBtn = document.getElementById('draw-btn');
     return drawBtn ? !drawBtn.disabled : false;
 }
+
+// 导出标签管理相关函数，以便其他模块使用
+export { selectTag, createTagElement, showModal, hideModal };
