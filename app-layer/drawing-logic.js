@@ -9,15 +9,46 @@ import { exportImage } from '../button-layer/file-io/export.js';
 let canvas;
 let ctx;
 let drawingState;
+let resizeObserver;
+
+// 防抖函数避免频繁重绘
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 // Initialize drawing logic
 export function initDrawingLogic() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     
-    // Initialize canvas size to match display size
+    // 移除固定的尺寸设置，完全依赖CSS控制
+    // 初始化时立即设置正确尺寸
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    
+    // 添加窗口大小变化监听（防抖处理）
+    window.addEventListener('resize', debounce(resizeCanvas, 250));
+    
+    // 添加ResizeObserver监听容器大小变化
+    const canvasContainer = document.getElementById('canvas-container');
+    if (canvasContainer) {
+        resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (entry.target === canvasContainer) {
+                    // 使用防抖避免频繁重绘
+                    debounce(resizeCanvas, 100)();
+                }
+            }
+        });
+        resizeObserver.observe(canvasContainer);
+    }
     
     // Initialize drawing state
     drawingState = initPolygonDrawing(canvas, ctx);
@@ -64,7 +95,7 @@ export function initDrawingLogic() {
         clearBtn.addEventListener('click', () => clearCanvas());
     }
     
-    // Disable canvas initially
+    // 初始禁用画布，等待图像导入
     canvas.style.cursor = 'not-allowed';
     
     // Setup keyboard shortcuts
@@ -72,11 +103,70 @@ export function initDrawingLogic() {
     
     // 让删除逻辑可被外部调用（如toolbar）
     window.deleteSelectedPolygons = deleteSelectedPolygons;
+    
+    console.log('Drawing logic initialized with adaptive canvas');
     return {
         canvas,
         ctx,
         drawingState
     };
+}
+
+// 改进的resizeCanvas函数 - 完全自适应
+export function resizeCanvas() {
+    const container = canvas.parentElement;
+    if (!container) return;
+    
+    // 获取容器实际尺寸（减去内边距）
+    const containerStyle = window.getComputedStyle(container);
+    const paddingX = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
+    const paddingY = parseFloat(containerStyle.paddingTop) + parseFloat(containerStyle.paddingBottom);
+    
+    const displayWidth = Math.max(100, Math.floor(container.clientWidth - paddingX));
+    const displayHeight = Math.max(100, Math.floor(container.clientHeight - paddingY));
+    
+    // 只在尺寸实际变化时更新，避免不必要的重绘
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        // 保存画布比例和内容
+        const previousWidth = canvas.width;
+        const previousHeight = canvas.height;
+        
+        // 设置新的画布尺寸
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+        
+        // 保持画布CSS尺寸与属性一致
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
+        
+        console.log(`Canvas resized from ${previousWidth}x${previousHeight} to ${displayWidth}x${displayHeight}`);
+        
+        // 重绘画布内容
+        if (drawingState) {
+            // 如果有导入的图像，需要重新绘制并保持位置
+            if (drawingState.importedImage) {
+                // 计算图像缩放比例
+                const scaleX = displayWidth / previousWidth;
+                const scaleY = displayHeight / previousHeight;
+                
+                // 调整图像偏移量以保持相对位置
+                if (drawingState.draggedImageOffset) {
+                    drawingState.draggedImageOffset.x *= scaleX;
+                    drawingState.draggedImageOffset.y *= scaleY;
+                }
+            }
+            
+            redrawCanvas(ctx, canvas);
+        }
+    }
+}
+
+// Cleanup function to remove observers
+export function cleanupDrawingLogic() {
+    if (resizeObserver) {
+        resizeObserver.disconnect();
+    }
+    window.removeEventListener('resize', debounce(resizeCanvas, 250));
 }
 
 // Setup keyboard shortcuts
@@ -95,7 +185,7 @@ function setupKeyboardShortcuts() {
                 }
                 break;
             case 'Escape':
-                // Cancel current polygon or clear selection`
+                // Cancel current polygon or clear selection
                 if (drawingState.mode === 'draw' && drawingState.currentPolygon) {
                     drawingState.cancelCurrentPolygon();
                     drawingState.startNewPolygon();
@@ -147,23 +237,6 @@ function deleteSelectedPolygons() {
     redrawCanvas(ctx, canvas);
 }
 
-// Resize canvas to match display size
-export function resizeCanvas() {
-    const displayWidth = canvas.clientWidth;
-    const displayHeight = canvas.clientHeight;
-    
-    // Check if the canvas size doesn't match display size
-    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-        canvas.width = displayWidth;
-        canvas.height = displayHeight;
-        
-        // Redraw canvas if drawing state exists
-        if (drawingState) {
-            redrawCanvas(ctx, canvas);
-        }
-    }
-}
-
 // Enable drawing mode
 export function enableDrawing() {
     // Require a selected tag before drawing
@@ -211,3 +284,6 @@ export function clearCanvas() {
     // Redraw canvas
     redrawCanvas(ctx, canvas);
 }
+
+// 导出防抖函数供其他模块使用
+export { debounce };
