@@ -37,6 +37,7 @@ body {
     justify-content: space-between;
     align-items: center;
     font-size: 1rem;
+    flex-shrink: 0; /* 防止被压缩 */
 }
 
 #top-bar > span:first-child{
@@ -62,7 +63,8 @@ body {
     overflow: hidden;
     gap: 16px;
     padding: 16px;
-    height: calc(100vh - 120px); /* 减去顶部和底部栏高度 */
+    height: calc(100vh - 100px); /* 调整高度计算，为底部状态栏预留空间 */
+    box-sizing: border-box; /* 确保内边距不影响总高度计算 */
 }
 
 /* 左侧侧边栏 - 现代化卡片 */
@@ -608,6 +610,9 @@ body {
     display: flex;
     justify-content: space-between;
     font-size: 0.875rem;
+    flex-shrink: 0; /* 防止被压缩 */
+    background: var(--panel); /* 确保背景不透明 */
+    border-top: 1px solid rgba(0,0,0,0.05); /* 增加分隔线 */
 }
 
 #status-bar span { color: var(--muted); }
