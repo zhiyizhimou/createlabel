@@ -13,37 +13,88 @@
     <div id="top-bar">
         <div class="top-bar-inner">
             <span>自动标注系统</span>
-            <span>版本 2.2.2</span>
+            <span>版本 2.3.0</span>
         </div>
     </div>
 
     <!-- 主容器：侧边栏、画布和标签面板 -->
     <main id="main-wrapper" style="flex:1;">
         <div id="main-container">
-            <!-- 左侧侧边栏：工具按钮 -->
+            <!-- 左侧侧边栏：工具按钮和标签管理 -->
             <div id="sidebar">
-                <button id="draw-btn" class="tool-btn active" title="绘制多边形">绘制</button>
-                <button id="select-btn" class="tool-btn" title="选择多边形">选择</button>
-                <button id="inference-btn" class="tool-btn" title="AI推理">推理</button>
-                <button id="clear-btn" class="tool-btn" title="清空画布">清空</button>
-                <button id="import-btn" class="tool-btn" title="导入图像">导入图像</button>
-                <button id="export-btn" class="tool-btn" title="导出图像">导出图像</button>
+                <!-- 工具按钮区域 - 添加分隔标识 -->
+                <div class="toolbar-section">
+                    <div class="section-header">
+                        <h3>工具面板</h3>
+                    </div>
+                    <div class="tools-grid">
+                        <button id="draw-btn" class="tool-btn active" title="绘制多边形">绘制</button>
+                        <button id="select-btn" class="tool-btn" title="选择多边形">选择</button>
+                        <button id="inference-btn" class="tool-btn" title="AI推理">推理</button>
+                        <button id="clear-btn" class="tool-btn" title="清空画布">清空</button>
+                        <button id="import-btn" class="tool-btn" title="导入图像">导入图像</button>
+                        <button id="export-btn" class="tool-btn" title="导出图像">导出图像</button>
+                    </div>
+                </div>
+
+                <!-- 标签管理区域 - 添加分隔标识 -->
+                <div class="tags-section">
+                    <div class="section-header">
+                        <h3>标签管理</h3>
+                        <button id="show-add-tag-modal" class="add-tag-button-small blue-bg">+ 添加标签</button>
+                    </div>
+                    <div id="tag-management">
+                        <div id="tags-list">
+                            <!-- 标签将动态添加到这里 -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 中间画布区域 -->
             <div id="canvas-container">
                 <canvas id="canvas"></canvas>
             </div>
-            <!-- 右侧属性面板：包含标签管理 -->
+            
+            <!-- 右侧属性面板 - 改为标签页结构 -->
             <div id="properties-panel">
-                <div class="section">
-                    <div class="section-header">
-                        <h3>标签管理</h3>
-                        <button id="show-add-tag-modal" class="add-tag-button-small">+ 添加标签</button>
+                <!-- 标签页导航 -->
+                <div class="tab-nav">
+                    <button class="tab-button active" data-tab="image-list">图片列表</button>
+                    <button class="tab-button" data-tab="ai-results">AI结果</button>
+                </div>
+                
+                <!-- 图片列表标签页 -->
+                <div id="image-list-tab" class="tab-content active">
+                    <div class="tab-header">
+                        <h3>图片列表</h3>
+                        <div class="tab-actions">
+                            <button id="save-to-list-btn" class="action-btn" title="将当前画布图片存入列表">存入图片</button>
+                            <button id="load-to-canvas-btn" class="action-btn" title="将选中图片放入画布">放入画布</button>
+                        </div>
                     </div>
-                    <div id="tag-management">
-                        <div id="tags-list">
-                            <!-- 标签将动态添加到这里 -->
+                    <div id="image-list-content">
+                        <div class="image-list-container">
+                            <div id="images-list" class="images-grid">
+                                <!-- 图片预览将动态添加到这里 -->
+                                <div class="empty-state">
+                                    <p>暂无图片</p>
+                                    <p class="empty-hint">使用"存入图片"按钮将画布图片添加到列表</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI结果标签页（保留原有功能） -->
+                <div id="ai-results-tab" class="tab-content">
+                    <div class="section-header">
+                        <h3>AI分割结果</h3>
+                    </div>
+                    <div id="ai-segment-content">
+                        <div class="ai-segment-placeholder" id="preview-placeholder">
+                            <p>AI分割结果将替换画布图像</p>
+                            <p class="placeholder-hint">使用推理功能后，原图将被分割结果替代</p>
                         </div>
                     </div>
                 </div>
