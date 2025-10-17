@@ -22,15 +22,27 @@
     
     /* 响应式调整：在小屏幕上缩小间距 */
     .tag-right-content {
-        gap: 8px;
-    }
-    
-    .tag-meta {
         gap: 6px;
     }
     
+    .tag-meta {
+        gap: 4px;
+    }
+    
     .tag-actions {
-        gap: 3px;
+        gap: 2px;
+    }
+
+    .tag-swatch {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* 在非常小的屏幕上隐藏透明度文本 */
+    @media (max-width: 500px) {
+        .tag-opacity-label {
+            display: none;
+        }
     }
     
     /* 小屏幕隐藏右侧面板或调整布局 */
