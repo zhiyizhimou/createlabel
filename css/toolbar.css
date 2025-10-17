@@ -1,0 +1,788 @@
+/* 工具栏和工具相关样式 */
+
+/* 工具栏区域 - 改进区分 */
+.toolbar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.toolbar-section .section-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.toolbar-section .section-header h3 {
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin: 0;
+}
+
+/* 工具按钮网格布局 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* 侧边栏按钮样式 */
+#sidebar button {
+    padding: 10px 12px;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: all 180ms ease;
+    text-align: left;
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+
+#sidebar button:hover {
+    background-color: rgba(37,99,235,0.06);
+    border-color: rgba(37,99,235,0.12);
+}
+
+#sidebar button.active {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+}
+
+/* 标签管理区域 - 改进区分 */
+.tags-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* 确保有最小高度 */
+    padding: 12px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.tags-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.tags-section .section-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+/* 蓝色背景的添加标签按钮 */
+.blue-bg {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.blue-bg:hover {
+    background: var(--primary-600) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* 调整标签列表样式以适应侧边栏 */
+#tag-management {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+#tags-list {
+    flex: 1;
+    max-height: none; /* 移除固定高度，使用flex布局 */
+    overflow-y: auto;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tag-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 标签项布局 - 让标签名称占据更多空间 */
+.tag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    min-height: 44px; /* 确保有足够的高度 */
+}
+
+/* 标签信息部分（名称）左对齐 */
+.tag-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1; /* 占据剩余空间 */
+    min-width: 0; /* 允许文本截断 */
+    overflow: hidden; /* 防止内容溢出 */
+}
+
+/* 标签名称左对齐，允许截断 */
+.tag-name {
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1; /* 占据.tag-info内的所有可用空间 */
+    min-width: 0;
+    text-align: left; /* 确保左对齐 */
+}
+
+/* 右侧内容容器 - 包含元数据和操作按钮 */
+.tag-right-content {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 减小间距 */
+    flex-shrink: 0; /* 防止被压缩 */
+    margin-left: auto; /* 右对齐 */
+}
+
+
+/* 元数据部分（透明度和颜色样本） */
+.tag-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 减小间距 */
+    flex-shrink: 0;
+    font-size: 0.75rem; /* 缩小字体 */
+}
+
+/* 颜色样本 */
+.tag-swatch {
+    width: 20px; /* 缩小尺寸 */
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.06); 
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* 操作按钮容器 */
+.tag-actions {
+    display: flex;
+    gap: 3px; /* 减小间距 */
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.tag-item:hover{ 
+    transform: translateY(-2px); 
+    box-shadow: var(--shadow-sm); 
+}
+
+.tag-item.selected{ 
+    box-shadow: 0 6px 18px rgba(3, 3, 3, 0.08); 
+    border: 2px solid rgba(16,185,129,0.12); 
+}
+
+.btn-ghost { 
+    background: transparent; 
+    border: 1px solid var(--muted);
+    padding: 2px 4px; /* 减小内边距 */
+    cursor: pointer; 
+    color: var(--muted); 
+    border-radius: 4px; 
+    font-size: 0.7rem; /* 缩小字体 */
+    min-height: 20px;
+    min-width: 20px;
+}
+
+.btn-ghost:hover{ 
+    background: rgba(15,23,42,0.04); 
+    color: var(--text); 
+}
+
+.btn-danger{ 
+    background: var(--danger); 
+    color: white; 
+    border: none; 
+    padding: 6px 8px; 
+    border-radius: 8px; 
+}
+
+.tag-edit-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 6px;
+    background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.98));
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    width: 100%; /* 确保编辑面板占据整个宽度 */
+}
+
+.tag-edit-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tag-edit-label {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.tag-edit-panel input[type="color"] {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.tag-edit-panel input[type="range"] {
+    width: 100%;
+}
+
+.tag-edit-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.tag-save-btn, .tag-cancel-btn {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.tag-save-btn{ 
+    background: var(--primary); 
+    color: white; 
+}
+
+.tag-cancel-btn{ 
+    background: transparent; 
+    color: var(--muted); 
+    border: 1px solid rgba(15,23,42,0.06); 
+}
+
+.tag-opacity-label-small {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+/* 标签管理标题行样式 */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+/* 小号添加标签按钮 */
+.add-tag-button-small {
+    padding: 6px 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+    white-space: nowrap;
+}
+
+.add-tag-button-small:hover {
+    background: var(--primary-600);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* 标签操作按钮样式 */
+.tag-action-btn {
+    padding: 3px 6px; /* 减小内边距 */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem; /* 缩小字体 */
+    font-weight: 500;
+    transition: all 160ms ease;
+    white-space: nowrap;
+    min-height: 20px; /* 设置最小高度 */
+}
+.tag-delete {
+    background-color: var(--danger);
+    color: white;
+}
+
+.tag-delete:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.tag-edit-btn {
+    background-color: var(--muted);
+    color: white;
+}
+
+.tag-edit-btn:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+/* 标签列表滚动条样式 */
+#tags-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#tags-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+}
+
+#tags-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+}
+
+#tags-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 标签页导航样式 */
+.tab-nav {
+    display: flex;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--muted);
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-button:hover:not(.active) {
+    color: var(--text);
+}
+
+/* 标签页内容样式 */
+.tab-content {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* 标签页头部样式 */
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+.tab-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.tab-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    padding: 4px 8px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--primary-600);
+}
+
+.action-btn:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 图片列表容器样式 */
+.image-list-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+/* 图片项样式 */
+.image-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.image-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.image-item.selected {
+    border-color: var(--primary);
+    animation: pulse 2s infinite;
+}
+
+.image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #f5f5f5;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview.loading {
+    opacity: 0.5;
+}
+
+.image-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    backdrop-filter: blur(4px);
+}
+
+.image-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.image-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.image-item:hover .image-actions {
+    opacity: 1;
+}
+
+.image-action-btn {
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-action-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* 图片预览背景样式 */
+.image-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+/* 图片列表滚动条样式 */
+.images-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.images-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.images-grid::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.images-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* AI结果标签页样式 */
+#ai-results-tab .section-header {
+    padding: 8px 4px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+#ai-results-tab .section-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+#ai-segment-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.8);
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.ai-segment-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--muted);
+}
+
+.ai-segment-placeholder p {
+    margin: 0 0 8px 0;
+}
+
+.placeholder-hint {
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* 添加标签按钮样式 */
+.add-tag-button {
+    display: none;
+}
+
+.add-tag-button:hover {
+    background: var(--primary-600);
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--panel);
+    margin: 10% auto;
+    padding: 0 20px 20px 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-md);
+    animation: modalSlideIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.close-modal {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 180ms ease;
+}
+
+.close-modal:hover {
+    color: var(--text);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow: hidden;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.input-group input[type="color"] {
+    width: 100%;
+    height: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.input-group input[type="range"] {
+    width: 100%;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.primary-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+}
+
+.primary-btn:hover {
+    background: var(--primary-600);
+}
+
+.secondary-btn {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 180ms ease;
+}
+
+.secondary-btn:hover {
+    color: var(--text);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* 标签输入区域样式 */
+.tag-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#tag-opacity-value {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
