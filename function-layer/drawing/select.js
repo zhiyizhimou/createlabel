@@ -1,5 +1,6 @@
 // 选择功能模块
 import { redrawCanvas } from './polygon.js';
+import { screenToWorld } from '../../button-layer/features/zoom-controls.js';
 
 /**
  * 启用选择模式
@@ -65,8 +66,14 @@ function handleSelectionMouseDown(e) {
     if (e.button !== 0) return; // 只处理左键点击
     
     const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    
+    // 转换为世界坐标（考虑缩放和偏移）
+    const worldPos = screenToWorld(screenX, screenY, e.target.drawingState);
+    const x = worldPos.x;
+    const y = worldPos.y;
+    
     const drawingState = e.target.drawingState;
     
     // 检查是否点击了多边形顶点
@@ -94,16 +101,16 @@ function handleSelectionMouseDown(e) {
         }
     }
     
-    // 开始选择框
+    // 开始选择框（使用屏幕坐标）
     drawingState.selectionRect = {
-        startX: x,
-        startY: y,
+        startX: screenX,
+        startY: screenY,
         width: 0,
         height: 0,
         isActive: true
     };
     
-    // 检查是否点击了多边形
+    // 检查是否点击了多边形（使用世界坐标）
     const clickedPolygon = drawingState.getPolygonAt(x, y);
     if (clickedPolygon) {
         // 如果按住Shift键，则添加到选择或取消选择
@@ -148,8 +155,13 @@ function handleSelectionMouseDown(e) {
 function handleSelectionMouseMove(e) {
     const drawingState = e.target.drawingState;
     const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    
+    // 转换为世界坐标（考虑缩放和偏移）
+    const worldPos = screenToWorld(screenX, screenY, drawingState);
+    const x = worldPos.x;
+    const y = worldPos.y;
     
     // 处理顶点移动
     if (drawingState.mode === 'move-vertex' && drawingState.dragStartPos) {
@@ -165,16 +177,16 @@ function handleSelectionMouseMove(e) {
         return;
     }
     
-    // 处理选择框
+    // 处理选择框（使用屏幕坐标）
     if (drawingState.selectionRect && drawingState.selectionRect.isActive) {
         // 更新选择框尺寸
-        drawingState.selectionRect.width = x - drawingState.selectionRect.startX;
-        drawingState.selectionRect.height = y - drawingState.selectionRect.startY;
+        drawingState.selectionRect.width = screenX - drawingState.selectionRect.startX;
+        drawingState.selectionRect.height = screenY - drawingState.selectionRect.startY;
         redrawCanvas(e.target.getContext('2d'), e.target);
         return;
     }
     
-    // 顶点悬停检测：当不在拖动模式时，检查鼠标是否悬停在顶点上
+    // 顶点悬停检测：当不在拖动模式时，检查鼠标是否悬停在顶点上（使用世界坐标）
     drawingState.hoveredVertexIndex = -1; // 重置
     if (drawingState.selectedPolygons.length === 1) {
         const polygon = drawingState.selectedPolygons[0];
@@ -226,7 +238,7 @@ function handleSelectionMouseUp(e) {
         (Math.abs(drawingState.selectionRect.width) > 5 || 
          Math.abs(drawingState.selectionRect.height) > 5)) {
         
-        // 标准化选择框坐标
+        // 标准化选择框坐标（屏幕坐标）
         const selRect = {
             left: Math.min(drawingState.selectionRect.startX, drawingState.selectionRect.startX + drawingState.selectionRect.width),
             top: Math.min(drawingState.selectionRect.startY, drawingState.selectionRect.startY + drawingState.selectionRect.height),
@@ -239,14 +251,21 @@ function handleSelectionMouseUp(e) {
             drawingState.clearSelection();
         }
         
-        // 选择所有与选择框相交的多边形
+        // 选择所有与选择框相交的多边形（需要将屏幕坐标转换为世界坐标进行判断）
         drawingState.polygons.forEach(polygon => {
-            const isInside = polygon.vertices.some(vertex => 
-                vertex.x >= selRect.left && 
-                vertex.x <= selRect.right && 
-                vertex.y >= selRect.top && 
-                vertex.y <= selRect.bottom
-            );
+            // 检查多边形的每个顶点是否在选择框内
+            const isInside = polygon.vertices.some(vertex => {
+                // 将世界坐标转换为屏幕坐标进行比较
+                const screenVertex = {
+                    x: vertex.x * drawingState.scale + drawingState.zoomOrigin.x,
+                    y: vertex.y * drawingState.scale + drawingState.zoomOrigin.y
+                };
+                
+                return screenVertex.x >= selRect.left && 
+                       screenVertex.x <= selRect.right && 
+                       screenVertex.y >= selRect.top && 
+                       screenVertex.y <= selRect.bottom;
+            });
             
             if (isInside && !polygon.isSelected) {
                 polygon.isSelected = true;
