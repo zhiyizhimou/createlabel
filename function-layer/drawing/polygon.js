@@ -1,5 +1,6 @@
 // 多边形绘制功能模块
 import { DrawingState } from './models.js';
+import { screenToWorld } from '../../button-layer/features/zoom-controls.js';
 
 /**
  * 全局绘图状态
@@ -43,13 +44,18 @@ export function initPolygonDrawing(canvas, ctx) {
     // 鼠标移动事件处理
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        
+        // 转换为世界坐标（考虑缩放和偏移）
+        const worldPos = screenToWorld(screenX, screenY, drawingState);
         mousePos = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
+            x: worldPos.x,
+            y: worldPos.y
         };
         
-        // 更新坐标显示
-        updateCoordinates(mousePos.x, mousePos.y);
+        // 更新坐标显示（显示屏幕坐标）
+        updateCoordinates(screenX, screenY);
         
         // 处理顶点移动
         if (drawingState.mode === 'move-vertex' && drawingState.dragStartPos) {
@@ -225,8 +231,13 @@ function handleDrawingMouseDown(e) {
     e.preventDefault();
     
     const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    
+    // 转换为世界坐标（考虑缩放和偏移）
+    const worldPos = screenToWorld(screenX, screenY, drawingState);
+    const x = worldPos.x;
+    const y = worldPos.y;
     
     // 如果悬停在第一个顶点上且至少有3个点，则闭合多边形
     if (hoveredVertexIndex === 0 && drawingState.currentPolygon.vertices.length >= 3) {
@@ -250,8 +261,13 @@ function handleDrawingMouseDown(e) {
 function handleDrawingRightClick(e) {
     e.preventDefault(); // 阻止默认右键菜单
     const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const screenX = e.clientX - rect.left;
+    const screenY = e.clientY - rect.top;
+    
+    // 转换为世界坐标（考虑缩放和偏移）
+    const worldPos = screenToWorld(screenX, screenY, drawingState);
+    const x = worldPos.x;
+    const y = worldPos.y;
 
     // 如果当前处于绘制模式且当前多边形有至少3个顶点，右键仍用于完成当前绘制
     if (drawingState.mode === 'draw' && drawingState.currentPolygon && drawingState.currentPolygon.vertices.length >= 3) {
@@ -314,6 +330,11 @@ export function redrawCanvas(ctx, canvas, includeHidden = false) {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // 应用缩放变换
+    ctx.save();
+    ctx.translate(drawingState.zoomOrigin.x, drawingState.zoomOrigin.y);
+    ctx.scale(drawingState.scale, drawingState.scale);
+    
     // 绘制导入的图像（如果存在）
     if (drawingState.importedImage) {
         const img = drawingState.importedImage;
@@ -347,8 +368,8 @@ export function redrawCanvas(ctx, canvas, includeHidden = false) {
     // 绘制所有已完成的多边形
     drawingState.polygons.forEach(polygon => {
         // 如果不包含隐藏项且该多边形属于一个被隐藏的标签，则跳过绘制
-        if (!includeHidden && polygon.tagName && window && Array.isArray(window.tags)) {
-            const tag = window.tags.find(t => t.name === polygon.tagName);
+        if (!includeHidden && polygon.tagName && window && Array.isArray(window.标签)) {
+            const tag = window.标签.find(t => t.name === polygon.tagName);
             if (tag && tag.visible === false) return; // skip drawing hidden tag polygons
         }
         polygon.draw(ctx);
@@ -382,7 +403,10 @@ export function redrawCanvas(ctx, canvas, includeHidden = false) {
         }
     }
     
-    // 绘制选择框（如果活动）
+    // 恢复变换
+    ctx.restore();
+    
+    // 绘制选择框（在缩放变换之外绘制，保持屏幕大小）
     if (drawingState.selectionRect) {
         ctx.beginPath();
         ctx.rect(
