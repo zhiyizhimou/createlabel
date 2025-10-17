@@ -1,0 +1,474 @@
+/* 响应式设计和媒体查询 */
+
+/* 响应式设计 - 包含字体调整 */
+@media (max-width: 900px) {
+    body { 
+        font-size: 14px; 
+    }
+    
+    #main-container { 
+        flex-direction: column; 
+        padding: 8px; 
+    }
+    
+    #sidebar, #properties-panel { 
+        width: 100%; 
+        order: 1; 
+    }
+    
+    #canvas-container { 
+        order: 2; 
+    }
+    
+    /* 响应式调整：在小屏幕上缩小间距 */
+    .tag-right-content {
+        gap: 8px;
+    }
+    
+    .tag-meta {
+        gap: 6px;
+    }
+    
+    .tag-actions {
+        gap: 3px;
+    }
+    
+    /* 小屏幕隐藏右侧面板或调整布局 */
+    #properties-panel {
+        display: none; /* 或调整为其他布局 */
+    }
+    
+    /* 图片列表网格调整为单列 */
+    .images-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 调整工具按钮网格为单列 */
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 调整模态框尺寸 */
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+    
+    /* 调整标签页导航 */
+    .tab-nav {
+        flex-direction: column;
+    }
+    
+    .tab-button {
+        padding: 10px;
+        text-align: center;
+    }
+    
+    /* 调整状态栏布局 */
+    #status-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    #status-bar span {
+        text-align: center;
+    }
+}
+
+/* 中等屏幕优化 */
+@media (min-width: 901px) and (max-width: 1199px) {
+    /* 调整侧边栏和属性面板宽度 */
+    #sidebar {
+        width: 250px;
+    }
+    
+    #properties-panel {
+        width: 250px;
+    }
+    
+    /* 调整图片列表网格 */
+    .images-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 调整工具按钮布局 */
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* 调整标签项布局 */
+    .tag-right-content {
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-end;
+    }
+    
+    .tag-meta {
+        order: 2;
+    }
+    
+    .tag-actions {
+        order: 1;
+    }
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1200px) {
+    #main-container {
+        max-width: 1400px; /* 限制最大宽度，避免过度拉伸 */
+        margin: 0 auto; /* 居中显示 */
+    }
+    
+    #sidebar {
+        width:300px; 
+    }
+    
+    #properties-panel {
+        width: 300px; /* 同步加大右侧面板 */
+    }
+    
+    /* 图片列表网格调整为两列 */
+    .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 超大屏幕优化 */
+@media (min-width: 1600px) {
+    #main-container {
+        max-width: 1600px;
+        padding: 20px; /* 增加内边距 */
+    }
+    
+    #canvas-container {
+        min-height: 500px; /* 增加最小高度 */
+    }
+    
+    #sidebar {
+        width: 320px; 
+    }
+    
+    #properties-panel {
+        width: 320px; /* 同步加大右侧面板 */
+    }
+    
+    /* 图片列表网格调整为三列 */
+    .images-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* 工具按钮网格调整为三列 */
+    .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    /* 增加字体大小 */
+    body {
+        font-size: 17px;
+    }
+    
+    /* 增加按钮内边距 */
+    .tool-btn {
+        padding: 12px 14px;
+    }
+    
+    .action-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* 超小屏幕优化（手机竖屏） */
+@media (max-width: 600px) {
+    body {
+        font-size: 13px;
+    }
+    
+    #top-bar {
+        padding: 8px 12px;
+    }
+    
+    #top-bar .top-bar-inner {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    #main-container {
+        padding: 4px;
+        gap: 8px;
+    }
+    
+    #sidebar, #properties-panel {
+        padding: 8px;
+    }
+    
+    .toolbar-section, .tags-section {
+        padding: 8px;
+    }
+    
+    .tool-btn {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+    
+    .tag-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .tag-right-content {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* 隐藏部分辅助信息 */
+    .tag-opacity-label, .tag-opacity-label-small {
+        display: none;
+    }
+    
+    /* 简化模态框 */
+    .modal-content {
+        width: 98%;
+        margin: 2% auto;
+        padding: 0 10px 15px 10px;
+    }
+    
+    .modal-header {
+        padding: 12px 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .primary-btn, .secondary-btn {
+        flex: none;
+    }
+}
+
+/* 横屏手机优化 */
+@media (max-width: 900px) and (orientation: landscape) {
+    #main-container {
+        height: calc(100vh - 80px); /* 减少高度以适应横屏 */
+    }
+    
+    #sidebar {
+        max-height: 300px; /* 限制侧边栏高度 */
+    }
+    
+    .images-grid {
+        max-height: 200px; /* 限制图片列表高度 */
+    }
+    
+    #tags-list {
+        max-height: 150px; /* 限制标签列表高度 */
+    }
+}
+
+/* 平板设备优化 */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #main-container {
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    #sidebar, #properties-panel {
+        width: 280px;
+    }
+    
+    .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* 调整工具按钮布局 */
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .image-item {
+        border: 1px solid #000000;
+    }
+    
+    .image-item.selected {
+        border-width: 2px;
+    }
+    
+    .tag-item {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    
+    .tag-item.selected {
+        border: 2px solid var(--primary);
+    }
+    
+    .tool-btn {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    
+    .tool-btn.active {
+        border: 2px solid var(--primary);
+    }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+    .tag-item:hover {
+        transform: none;
+    }
+    
+    .image-item:hover {
+        transform: none;
+    }
+    
+    .tool-btn:hover {
+        transform: none;
+    }
+    
+    .tag-action-btn:hover {
+        transform: none;
+    }
+    
+    .image-item.selected {
+        animation: none;
+    }
+    
+    .modal-content {
+        animation: none;
+    }
+    
+    .tab-content {
+        animation: none;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1a1a1a;
+        --panel: #2d2d2d;
+        --muted: #a0a0a0;
+        --text: #ffffff;
+        --primary: #3b82f6;
+        --primary-600: #2563eb;
+        --accent: #10b981;
+        --danger: #ef4444;
+    }
+    
+    body {
+        background: linear-gradient(180deg, var(--bg), #1f1f1f 60%);
+    }
+    
+    #sidebar, #properties-panel {
+        background: linear-gradient(180deg, rgba(45,45,45,0.6), rgba(45,45,45,0.4));
+    }
+    
+    .toolbar-section, .tags-section {
+        background: rgba(45,45,45,0.8);
+    }
+    
+    .tag-item {
+        background: linear-gradient(180deg, rgba(45,45,45,0.6), rgba(45,45,45,0.5));
+    }
+    
+    .image-item::before {
+        background: linear-gradient(45deg, #333 25%, transparent 25%), 
+                    linear-gradient(-45deg, #333 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #333 75%), 
+                    linear-gradient(-45deg, transparent 75%, #333 75%);
+    }
+}
+
+/* 打印样式 */
+@media print {
+    #top-bar, #sidebar, #properties-panel, #status-bar {
+        display: none;
+    }
+    
+    #main-container {
+        padding: 0;
+        height: auto;
+    }
+    
+    #canvas-container {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}
+
+/* 超高清屏幕支持 */
+@media (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: subpixel-antialiased;
+        -moz-osx-font-smoothing: auto;
+    }
+    
+    .tag-swatch, .image-preview, #canvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .tag-item:hover, .image-item:hover, .tool-btn:hover {
+        transform: none;
+    }
+    
+    .tag-actions, .image-actions {
+        opacity: 1; /* 在触摸设备上始终显示操作按钮 */
+    }
+    
+    .tool-btn, .action-btn, .tag-action-btn {
+        min-height: 44px; /* 满足触摸目标最小尺寸 */
+        min-width: 44px;
+    }
+    
+    /* 增加触摸目标间距 */
+    .tools-grid {
+        gap: 12px;
+    }
+    
+    .tag-actions {
+        gap: 8px;
+    }
+}
+
+/* 折叠屏设备支持 */
+@media (max-width: 900px) and (max-height: 500px) {
+    #main-container {
+        flex-direction: row;
+        height: calc(100vh - 60px);
+    }
+    
+    #sidebar {
+        width: 200px;
+        max-height: none;
+    }
+    
+    #canvas-container {
+        order: 1;
+    }
+    
+    #properties-panel {
+        display: flex;
+        width: 200px;
+    }
+}
