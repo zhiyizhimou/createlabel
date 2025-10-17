@@ -3,6 +3,8 @@ import { initDrawingLogic, enableDrawing, enableSelectionMode, clearCanvas, resi
 import { redrawCanvas } from '../function-layer/drawing/polygon.js';
 import { setupImportButton } from './file-io/import.js';
 import { exportImage } from './file-io/export.js';
+import { initSegmentationPreview } from './features/ai-inference.js';
+import ImageListManager from './features/image-list-manager.js';
 
 // 将模态框相关变量提升到模块作用域
 let currentEditingTag = null;
@@ -205,7 +207,7 @@ function updateTagElement(tag, oldName = null) {
                 colorSwatch.style.opacity = String(tag.opacity);
             }
             
-            if (opacityLabel) {
+            if ( opacityLabel) {
                 opacityLabel.textContent = `${Math.round(tag.opacity * 100)}%`;
             }
             
@@ -387,6 +389,12 @@ export function initToolbar() {
     // Initialize drawing logic
     const { canvas } = initDrawingLogic();
     
+    // 初始化图片列表管理器
+    window.imageListManager = new ImageListManager();
+    
+    // 初始化分割预览功能
+    initSegmentationPreview();
+    
     // Get toolbar buttons
     const drawBtn = document.getElementById('draw-btn');
     const selectBtn = document.getElementById('select-btn');
@@ -467,6 +475,11 @@ export function initToolbar() {
             statusElement.textContent = '图像已导入，可以使用绘图工具';
         }
         
+        // 更新图片列表按钮状态
+        if (window.imageListManager) {
+            window.imageListManager.updateButtonStates();
+        }
+        
         // Set draw as default active tool after import
         if (drawBtn && !drawBtn.disabled) {
             drawBtn.click();
@@ -480,6 +493,33 @@ export function initToolbar() {
             }
         });
     }
+    
+    // 监听画布状态变化，更新图片列表按钮状态
+    const updateImageListButtons = () => {
+        if (window.imageListManager) {
+            window.imageListManager.updateButtonStates();
+        }
+    };
+
+    // 监听画布变化
+    if (canvas) {
+        // 使用 MutationObserver 监听画布属性变化
+        const observer = new MutationObserver(updateImageListButtons);
+        observer.observe(canvas, { attributes: true, attributeFilter: ['style'] });
+        
+        // 监听绘图状态变化
+        const checkDrawingState = () => {
+            if (canvas.drawingState) {
+                updateImageListButtons();
+            } else {
+                setTimeout(checkDrawingState, 100);
+            }
+        };
+        checkDrawingState();
+    }
+
+    // 初始更新一次
+    setTimeout(updateImageListButtons, 100);
     
     // Initialize tag management
     initTagManagement();
