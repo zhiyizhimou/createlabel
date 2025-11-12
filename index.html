@@ -67,45 +67,26 @@
                 <canvas id="canvas"></canvas>
             </div>
             
-            <!-- 右侧属性面板 - 改为标签页结构 -->
+            <!-- 右侧属性面板 - 简化为只有图片列表 -->
             <div id="properties-panel">
-                <!-- 标签页导航 -->
-                <div class="tab-nav">
-                    <button class="tab-button active" data-tab="image-list">图片列表</button>
-                    <button class="tab-button" data-tab="ai-results">AI结果</button>
+                <!-- 图片列表头部 -->
+                <div class="image-list-header">
+                    <h3>图片列表</h3>
+                    <div class="image-list-actions">
+                        <button id="save-to-list-btn" class="action-btn" title="将当前画布图片存入列表">存入图片</button>
+                        <button id="load-to-canvas-btn" class="action-btn" title="将选中图片放入画布">放入画布</button>
+                    </div>
                 </div>
                 
-                <!-- 图片列表标签页 -->
-                <div id="image-list-tab" class="tab-content active">
-                    <div class="tab-header">
-                        <h3>图片列表</h3>
-                        <div class="tab-actions">
-                            <button id="save-to-list-btn" class="action-btn" title="将当前画布图片存入列表">存入图片</button>
-                            <button id="load-to-canvas-btn" class="action-btn" title="将选中图片放入画布">放入画布</button>
-                        </div>
-                    </div>
-                    <div id="image-list-content">
-                        <div class="image-list-container">
-                            <div id="images-list" class="images-grid">
-                                <!-- 图片预览将动态添加到这里 -->
-                                <div class="empty-state">
-                                    <p>暂无图片</p>
-                                    <p class="empty-hint">使用"存入图片"按钮将画布图片添加到列表</p>
-                                </div>
+                <!-- 图片列表内容 -->
+                <div id="image-list-content">
+                    <div class="image-list-container">
+                        <div id="images-list" class="images-grid">
+                            <!-- 图片预览将动态添加到这里 -->
+                            <div class="empty-state">
+                                <p>暂无图片</p>
+                                <p class="empty-hint">使用"存入图片"按钮将画布图片添加到列表</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- AI结果标签页（保留原有功能） -->
-                <div id="ai-results-tab" class="tab-content">
-                    <div class="section-header">
-                        <h3>AI分割结果</h3>
-                    </div>
-                    <div id="ai-segment-content">
-                        <div class="ai-segment-placeholder" id="preview-placeholder">
-                            <p>AI分割结果将替换画布图像</p>
-                            <p class="placeholder-hint">使用推理功能后，原图将被分割结果替代</p>
                         </div>
                     </div>
                 </div>
