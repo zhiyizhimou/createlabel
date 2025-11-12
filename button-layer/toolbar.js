@@ -313,7 +313,7 @@ function createTagElement(tag, tagsList) {
     const visBtn = document.createElement('button');
     visBtn.className = 'btn-ghost';
     visBtn.title = '显示/隐藏 标签绘制';
-    visBtn.innerHTML = '👁';
+    visBtn.innerHTML = '👁👁';
     visBtn.addEventListener('click', (ev) => {
         ev.stopPropagation();
         tag.visible = !tag.visible;
@@ -391,9 +391,6 @@ export function initToolbar() {
     
     // 初始化图片列表管理器
     window.imageListManager = new ImageListManager();
-    
-    // 初始化分割预览功能
-    initSegmentationPreview();
     
     // Get toolbar buttons
     const drawBtn = document.getElementById('draw-btn');
