@@ -78,7 +78,7 @@
     border: 1px solid rgba(15,23,42,0.04);
 }
 
-/* 右侧属性面板 - 现在显示标签页结构 */
+/* 右侧属性面板 - 简化为只有图片列表 */
 #properties-panel {
     display: flex;
     flex-direction: column;
@@ -88,7 +88,7 @@
     border-radius: var(--card-radius);
     box-shadow: var(--shadow-sm);
     height: 100%;
-    gap: 16px;
+    gap: 12px;
 }
 
 /* 底部状态栏：简洁 */
@@ -142,21 +142,18 @@
     margin-top: 20px;
 }
 
-/* 标签页导航布局 */
-.tab-nav {
+/* 图片列表头部布局 */
+.image-list-header {
     display: flex;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
+    padding: 0 4px;
 }
 
-.tab-content {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-}
-
-.tab-content.active {
+.image-list-actions {
     display: flex;
+    gap: 6px;
 }
 
 /* 图片列表容器布局 */
@@ -299,20 +296,6 @@
     gap: 2px;
     opacity: 0;
     transition: opacity 0.2s ease;
-}
-
-/* 标签页头部布局 */
-.tab-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    padding: 0 4px;
-}
-
-.tab-actions {
-    display: flex;
-    gap: 6px;
 }
 
 /* 区域头部布局 */
