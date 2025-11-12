@@ -2,7 +2,15 @@
 @import url('css/base.css');
 @import url('css/layout.css');
 @import url('css/components.css');
-@import url('css/toolbar.css');
+
+/* 工具栏相关模块 */
+@import url('css/toolbar/_buttons.css');
+@import url('css/toolbar/_toolbar.css');
+@import url('css/toolbar/_tags.css');
+@import url('css/toolbar/_modal.css');
+@import url('css/toolbar/_tabs.css');
+@import url('css/toolbar/_image-list.css');
+
 @import url('css/responsive.css');
 
 /* 全局样式覆盖和特殊规则可以放在这里 */
