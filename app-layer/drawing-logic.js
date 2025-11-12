@@ -28,6 +28,12 @@ function debounce(func, wait) {
     };
 }
 
+// 获取当前选择的病灶类型
+export function getSelectedLesionType() {
+    const selectElement = document.getElementById('lesion-type-select');
+    return selectElement ? selectElement.value : 'lung_nodule'; // 默认肺结节
+}
+
 // Initialize drawing logic
 export function initDrawingLogic() {
     canvas = document.getElementById('canvas');
@@ -112,6 +118,24 @@ export function initDrawingLogic() {
                 return;
             }
             runSegmentation();
+        });
+    }
+    
+    // 新增：病灶选择器变化监听
+    const lesionSelect = document.getElementById('lesion-type-select');
+    if (lesionSelect) {
+        lesionSelect.addEventListener('change', function() {
+            console.log('病灶类型已更改为:', this.value);
+            // 更新状态栏显示
+            const helpTextElement = document.getElementById('help-text');
+            if (helpTextElement) {
+                const lesionNames = {
+                    'lung_nodule': '肺结节',
+                    'skin_cancer': '皮肤癌', 
+                    'breast_cancer': '乳腺癌'
+                };
+                helpTextElement.textContent = `当前病灶类型: ${lesionNames[this.value]}`;
+            }
         });
     }
     
