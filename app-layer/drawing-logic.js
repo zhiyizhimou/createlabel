@@ -5,9 +5,9 @@ import { enableSelection, clearSelection } from '../function-layer/drawing/selec
 import { initColorPicker } from '../function-layer/color/color.js';
 import { setupImportButton } from '../button-layer/file-io/import.js';
 import { exportImage } from '../button-layer/file-io/export.js';
-// 新增：导入推理分割函数
+// 保留：导入推理分割函数
 import { runSegmentation } from '../button-layer/features/ai-inference.js';
-// 新增：导入缩放功能
+// 保留：导入缩放功能
 import { initZoom } from '../button-layer/features/zoom-controls.js';
 
 let canvas;
@@ -94,7 +94,7 @@ export function initDrawingLogic() {
     const selectBtn = document.getElementById('select-btn');
     const fillBtn = document.getElementById('fill-btn');
     const clearBtn = document.getElementById('clear-btn');
-    // 新增：获取推理按钮元素
+    // 保留：获取推理按钮元素
     const inferenceBtn = document.getElementById('inference-btn');
 
     if (drawBtn) {
@@ -109,7 +109,7 @@ export function initDrawingLogic() {
     if (clearBtn) {
         clearBtn.addEventListener('click', () => clearCanvas());
     }
-    // 新增：为推理按钮添加点击事件
+    // 保留：为推理按钮添加点击事件
     if (inferenceBtn) {
         inferenceBtn.addEventListener('click', () => {
             // 检查是否有导入的图像
@@ -121,7 +121,7 @@ export function initDrawingLogic() {
         });
     }
     
-    // 新增：病灶选择器变化监听
+    // 保留：病灶选择器变化监听
     const lesionSelect = document.getElementById('lesion-type-select');
     if (lesionSelect) {
         lesionSelect.addEventListener('change', function() {
@@ -319,7 +319,7 @@ export function clearCanvas() {
     drawingState.importedImage = null;
     drawingState.draggedImageOffset = { x: 0, y: 0 };
     
-    // 新增：重置缩放状态
+    // 保留：重置缩放状态
     drawingState.scale = 1.0;
     drawingState.zoomOrigin = { x: 0, y: 0 };
     
