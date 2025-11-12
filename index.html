@@ -27,10 +27,21 @@
                     <div class="section-header">
                         <h3>工具面板</h3>
                     </div>
+                    
+                    <!-- 新增：病灶类型选择下拉列表 -->
+                    <div class="lesion-selector-group">
+                        <label for="lesion-type-select">病灶类型:</label>
+                        <select id="lesion-type-select" class="lesion-select">
+                            <option value="lung_nodule">肺结节</option>
+                            <option value="skin_cancer">皮肤癌</option>
+                            <option value="breast_cancer">乳腺癌</option>
+                        </select>
+                    </div>
+                    
                     <div class="tools-grid">
                         <button id="draw-btn" class="tool-btn active" title="绘制多边形">绘制</button>
                         <button id="select-btn" class="tool-btn" title="选择多边形">选择</button>
-                        <button id="inference-btn" class="tool-btn" title="AI推理">推理</button>
+                        <button id="inference-btn" class="tool-btn" title="AI推理">自动勾画</button>
                         <button id="clear-btn" class="tool-btn" title="清空画布">清空</button>
                         <button id="import-btn" class="tool-btn" title="导入图像">导入图像</button>
                         <button id="export-btn" class="tool-btn" title="导出图像">导出图像</button>
