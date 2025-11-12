@@ -20,49 +20,9 @@
         order: 2; 
     }
     
-    /* 响应式调整：在小屏幕上缩小间距 */
-    .tag-right-content {
-        gap: 6px;
-    }
-    
-    .tag-meta {
-        gap: 4px;
-    }
-    
-    .tag-actions {
-        gap: 2px;
-    }
-
-    .tag-swatch {
-        width: 18px;
-        height: 18px;
-    }
-
-    /* 病灶选择器响应式调整 */
-    .lesion-selector-group {
-        margin-bottom: 8px;
-        padding: 6px;
-    }
-    
-    .lesion-selector-group label {
-        font-size: 0.8rem;
-    }
-    
-    .lesion-select {
-        padding: 6px 8px;
-        font-size: 0.85rem;
-    }
-
-    /* 在非常小的屏幕上隐藏透明度文本 */
-    @media (max-width: 500px) {
-        .tag-opacity-label {
-            display: none;
-        }
-    }
-    
     /* 小屏幕隐藏右侧面板或调整布局 */
     #properties-panel {
-        display: none; /* 或调整为其他布局 */
+        display: block; /* 确保在小屏幕上显示 */
     }
     
     /* 图片列表网格调整为单列 */
@@ -79,16 +39,6 @@
     .modal-content {
         width: 95%;
         margin: 5% auto;
-    }
-    
-    /* 调整标签页导航 */
-    .tab-nav {
-        flex-direction: column;
-    }
-    
-    .tab-button {
-        padding: 10px;
-        text-align: center;
     }
     
     /* 调整状态栏布局 */
@@ -122,21 +72,6 @@
     /* 调整工具按钮布局 */
     .tools-grid {
         grid-template-columns: 1fr;
-    }
-    
-    /* 调整标签项布局 */
-    .tag-right-content {
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-end;
-    }
-    
-    .tag-meta {
-        order: 2;
-    }
-    
-    .tag-actions {
-        order: 1;
     }
 }
 
@@ -238,37 +173,6 @@
     .tool-btn {
         padding: 8px 10px;
         font-size: 0.9rem;
-    }
-    
-    .tag-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .tag-right-content {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    /* 病灶选择器超小屏幕优化 */
-    .lesion-selector-group {
-        margin-bottom: 6px;
-        padding: 4px;
-    }
-    
-    .lesion-selector-group label {
-        font-size: 0.75rem;
-    }
-    
-    .lesion-select {
-        padding: 4px 6px;
-        font-size: 0.8rem;
-    }
-    
-    /* 隐藏部分辅助信息 */
-    .tag-opacity-label, .tag-opacity-label-small {
-        display: none;
     }
     
     /* 简化模态框 */
@@ -388,10 +292,6 @@
     .modal-content {
         animation: none;
     }
-    
-    .tab-content {
-        animation: none;
-    }
 }
 
 /* 深色模式支持 */
@@ -428,26 +328,6 @@
                     linear-gradient(-45deg, #333 25%, transparent 25%), 
                     linear-gradient(45deg, transparent 75%, #333 75%), 
                     linear-gradient(-45deg, transparent 75%, #333 75%);
-    }
-    
-    /* 病灶选择器深色模式适配 */
-    .lesion-selector-group {
-        background: rgba(45,45,45,0.6);
-    }
-    
-    .lesion-select {
-        background: #3d3d3d;
-        color: #ffffff;
-        border-color: #555555;
-    }
-    
-    .lesion-select:hover {
-        border-color: #3b82f6;
-    }
-    
-    .lesion-select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
     }
 }
 
@@ -494,10 +374,6 @@
         transform: none;
     }
     
-    .tag-actions, .image-actions {
-        opacity: 1; /* 在触摸设备上始终显示操作按钮 */
-    }
-    
     .tool-btn, .action-btn, .tag-action-btn {
         min-height: 44px; /* 满足触摸目标最小尺寸 */
         min-width: 44px;
@@ -506,10 +382,6 @@
     /* 增加触摸目标间距 */
     .tools-grid {
         gap: 12px;
-    }
-    
-    .tag-actions {
-        gap: 8px;
     }
 }
 
