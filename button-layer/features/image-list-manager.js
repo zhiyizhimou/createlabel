@@ -14,13 +14,6 @@ class ImageListManager {
     }
 
     setupEventListeners() {
-        // 标签页切换
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                this.switchTab(e.target.dataset.tab);
-            });
-        });
-
         // 存入图片按钮
         document.getElementById('save-to-list-btn').addEventListener('click', () => {
             this.saveCanvasToImageList();
@@ -29,19 +22,6 @@ class ImageListManager {
         // 放入画布按钮
         document.getElementById('load-to-canvas-btn').addEventListener('click', () => {
             this.loadImageToCanvas();
-        });
-    }
-
-    // 切换标签页
-    switchTab(tabName) {
-        // 更新按钮状态
-        document.querySelectorAll('.tab-button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabName);
-        });
-
-        // 更新内容显示
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.toggle('active', content.id === `${tabName}-tab`);
         });
     }
 
@@ -92,14 +72,12 @@ class ImageListManager {
 
     // 将选中的图片加载到画布
     loadImageToCanvas() {
-        // 直接使用当前选中的图片ID，不进行额外检查
         if (this.selectedImageId === null) {
-            return; // 不应该发生，因为按钮已禁用
+            return;
         }
 
         const imageItem = this.images.find(img => img.id === this.selectedImageId);
         
-        // 如果找不到图片，可能是数据不一致，尝试重新渲染列表
         if (!imageItem) {
             console.warn('图片数据不一致，重新渲染列表');
             this.renderImageList();
@@ -180,7 +158,6 @@ class ImageListManager {
 
     // 选择图片
     selectImage(imageId) {
-        // 确保图片ID在列表中存在
         const imageExists = this.images.some(img => img.id === imageId);
         if (!imageExists) {
             console.warn('尝试选择不存在的图片:', imageId);
