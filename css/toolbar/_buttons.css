@@ -1,0 +1,180 @@
+/* 按钮组件样式 */
+.primary-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+}
+
+.primary-btn:hover {
+    background: var(--primary-600);
+}
+
+.secondary-btn {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 180ms ease;
+}
+
+.secondary-btn:hover {
+    color: var(--text);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.action-btn {
+    padding: 4px 8px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2 ease;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: var(--primary-600);
+}
+
+.action-btn:disabled {
+    background: var(--muted);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.tool-btn {
+    padding: 10px 12px;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: all 180ms ease;
+    text-align: left;
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+
+.tool-btn:hover {
+    background-color: rgba(37,99,235,0.06);
+    border-color: rgba(37,99,235,0.12);
+}
+
+.tool-btn.active {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 6px 18px rgba(37,99,235,0.12);
+}
+
+.btn-ghost { 
+    background: transparent; 
+    border: 1px solid var(--muted);
+    padding: 4px 8px;
+    cursor: pointer; 
+    color: var(--muted); 
+    border-radius: 6px; 
+    font-size: 0.75rem;
+    transition: all 160ms ease;
+}
+
+.btn-ghost:hover { 
+    background: rgba(15,23,42,0.04); 
+    color: var(--text); 
+    border-color: var(--text); 
+    transform: translateY(-1px);
+}
+
+.tag-action-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 160ms ease;
+    white-space: nowrap;
+}
+
+.tag-delete {
+    background-color: var(--danger);
+    color: white;
+}
+
+.tag-delete:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+}
+
+.tag-edit-btn {
+    background-color: var(--muted);
+    color: white;
+}
+
+.tag-edit-btn:hover {
+    background-color: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.2);
+}
+
+.image-action-btn {
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-action-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.add-tag-button-small {
+    padding: 6px 10px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+    white-space: nowrap;
+}
+
+.add-tag-button-small:hover {
+    background: var(--primary-600);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.blue-bg {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.blue-bg:hover {
+    background: var(--primary-600) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
