@@ -42,7 +42,7 @@
     font-size: 0.75rem;
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 0.2 ease;
+    transition: background-color 0.2s ease;
 }
 
 .action-btn:hover:not(:disabled) {
