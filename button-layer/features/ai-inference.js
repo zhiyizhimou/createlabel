@@ -54,9 +54,9 @@ export async function runSegmentation() {
         // 6. 调用后端分割接口，传递病灶类型
         const formData = new FormData();
         formData.append('image', blob, 'canvas-image.png');
-        formData.append('lesion_type', lesionType); // 新增：传递病灶类型
-        
-        const response = await fetch('http://127.0.0.1:5000/predict', { 
+        formData.append('lesion_type', lesionType);
+
+        const response = await fetch('http://127.0.0.1:5000/predict', {
             method: 'POST',
             body: formData
         });
@@ -68,19 +68,18 @@ export async function runSegmentation() {
 
         // 7. 处理后端返回的结果（包含mask和overlay）
         const result = await response.json();
-        
-        // 简化版本：优先显示边缘叠加图
-        if (result.overlay) {
-            // 显示边缘叠加图
-            setSegmentationAsCanvasImage(result.overlay, canvas, drawingState);
-            if (helpTextElement) {
-                helpTextElement.textContent = `${lesionNames[lesionType]}分割完成，已显示边缘叠加图`;
-            }
-        } else if (result.mask) {
-            // 显示黑白掩码图
+
+        // 修改：统一优先显示黑白掩码图
+        if (result.mask) {
             setSegmentationAsCanvasImage(result.mask, canvas, drawingState);
             if (helpTextElement) {
-                helpTextElement.textContent = `${lesionNames[lesionType]}分割完成，已显示黑白掩码图`;
+                helpTextElement.textContent = '分割完成，已显示黑白掩码图';
+            }
+        } else if (result.overlay) {
+            // 如果没有掩码图，则显示边缘叠加图
+            setSegmentationAsCanvasImage(result.overlay, canvas, drawingState);
+            if (helpTextElement) {
+                helpTextElement.textContent = '分割完成，已显示边缘叠加图（掩码图不可用）';
             }
         } else {
             alert('未获取到分割结果');
@@ -89,7 +88,7 @@ export async function runSegmentation() {
     } catch (error) {
         console.error('分割失败:', error);
         alert(`分割过程出错: ${error.message}`);
-        
+
         const helpTextElement = document.getElementById('help-text');
         if (helpTextElement) {
             helpTextElement.textContent = '分割失败，请检查网络连接和后端服务';
@@ -100,22 +99,22 @@ export async function runSegmentation() {
 // 将分割结果设置为画布图像
 function setSegmentationAsCanvasImage(imageBase64, canvas, drawingState) {
     const img = new Image();
-    
+
     img.onload = () => {
         // 设置分割结果为新的画布图像
         drawingState.setImportedImage(img);
         drawingState.draggedImageOffset = { x: 0, y: 0 };
-        
+
         // 重绘画布
         const ctx = canvas.getContext('2d');
         redrawCanvas(ctx, canvas);
     };
-    
+
     img.onerror = (error) => {
         console.error('加载分割结果失败:', error);
         alert('无法加载分割结果图像');
     };
-    
+
     img.src = `data:image/png;base64,${imageBase64}`;
 }
 
